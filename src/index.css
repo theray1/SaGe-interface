@@ -14,17 +14,6 @@ code {
     monospace;
 }
 
-.App {
-  background-color: '#B8CEFF'; 
-  z-index:8;
-}
-
-.Metrics {
-  text-align: left;
-  z-index:9;
-}
-
-.MainGraph {
-  width: "100%";
-  height: "800px"
+textarea {
+  resize: none;
 }

@@ -22,16 +22,12 @@ import PlanGraphWithMetrics from './PlanGraphWithMetrics';
 const nodeTypes = { queryNode: QueryNode,
                     queryLeaf: QueryLeaf };
 
-//TODO: Mettre dans un css
-const graphStyle = { backgroundColor: '#B8CEFF' };
-const pageStyle = { width: "100%", height: "800px" };
-
 function App(){
-  const [idCount, setIdCount] = useState(5);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodesInit);
   const [edges, setEdges, onEdgesChange] = useEdgesState(edgesInit);
-  const [text, changeText] = useState("");
+
+  const [isQueryEditable, setIsQueryEditable] = useState(true);
 
   const nodeWidth = 200;
   const nodeHeight = 150;
@@ -69,21 +65,6 @@ function App(){
   };
 
   layoutElements(nodesInit, edgesInit);
-
-  /*const addNode = (nodeName) => {
-    const nodesCopy = nodes.slice();
-    nodesCopy.push({
-      id: idCount,
-      type: "queryNode",
-      data: {
-        label: nodeName
-      },
-      position: { x: 0, y: 0}
-    })
-
-    setNodes(nodesCopy);
-    setIdCount(idCount+1);
-  }*/
 
   //Query management
   let sparqlRequest = {
@@ -149,6 +130,7 @@ function App(){
   //Starts the process of parsing the query and sending the query to the SaGe server 
   const commitQuery = (q) => {
     console.log("Running : ", q);
+    setIsQueryEditable(false);
 
     let fetchData = {
       method: 'POST',
@@ -209,31 +191,58 @@ function App(){
       if(data["next"] !== null){
         let graphElements = protoplan_to_graph(data["next"]);
         elementsToNodesAndEdges(graphElements);
+      } else {
+        setIsQueryEditable(true);
       }
       updateStats(data["stats"]);
     })
     .catch((error) => {console.log(error)});
   }
 
+  const graphProps = {
+    onNodesChange: onNodesChange,
+    stats: stats
+  }
+
+
+  //TODO: Mettre dans un css
+  const mainGraphStyle = { width: "100%", height: "100%", backgroundColor: '#B8CEFF' };
+  const mainGraphWithMetricsStyle = { width: "100%", height: "66%" };
+  const appStyle = { width: "100%", height: "100vh" }
+  const headerStyle = { width: "100%", height: "23.7%" }
+  const metricsStyle = {backgroundColor: "grey", textAlign: "left"};
+  const queryInputStyle = { width: "30%", height: "25%" };
+
   return(
-      <div className="App" style={pageStyle}>
-        <h1>Query Change Monitoring</h1>
-        <h2>Prototype</h2>
+    <div className="App" style={appStyle}>
+    <div className='Header' style={headerStyle}>
+      <h1>Query Change Monitoring</h1>
+      <h2>Prototype</h2>
 
-        <input placeholder='Query' type="text" name="QueryTextInput" value={queryInput} onChange={(e) => setQueryInput(e.target.value)}></input>
+      <textarea rows={4} style={queryInputStyle} placeholder='Query' type="text" name="QueryTextInput" value={queryInput} onChange={(e) => {if(isQueryEditable)setQueryInput(e.target.value)}}></textarea>
 
-        <br></br>
-        <br></br>
+      <br></br>
+      <br></br>
 
-        <button onClick={() => commitQuery(queryInput)}>commit query</button>
+      <button onClick={() => {if(isQueryEditable)commitQuery(queryInput)}}>commit query</button>
 
-        <br></br>
-        <br></br>
+      <button onClick={() => commitNext()}>debug button</button>
+    </div>
+    <div className="MainGraphWithMetrics" style={mainGraphWithMetricsStyle}>
+        <div className="Metrics" style={metricsStyle}>
+            export:{stats.exportMetric}<br/>
+            import:{stats.importMetric}<br/>
+            cardinality:{stats.cardinalityMetric}<br/>
+            cost:{stats.costMetric}<br/>
+            coverage:{stats.coverageMetric}<br/>
+            progression:{stats.progressionMetric}<br/>
+        </div>
 
-        <button onClick={() => commitNext()}>debug button</button>
-
-        <ReactFlow className='MainGraph' edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls/></ReactFlow>
-       </div>
+        <div className='MainGraph' style={mainGraphStyle}>
+          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
+        </div>         
+    </div>
+  </div>
   )
 }
 
@@ -244,7 +253,7 @@ ReactDOM.render(
   document.getElementById('root')
 );  
 
-//<ReactFlow className='MainGraph' edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls/></ReactFlow>
+//<ReactFlow className='MainGraph1' edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls/></ReactFlow>
 //<PlanGraphWithMetrics props={stats} nodes={nodes} edges={edges} onNodesChange={onNodesChange}/>
 
 // If you want to start measuring performance in your app, pass a function

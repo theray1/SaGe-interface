@@ -3,7 +3,7 @@ import { Handle } from "react-flow-renderer";
 import SlideBar from "./SlideBar";
 
 
-function QueryNode({data, selected}){
+function QueryNode(props){
 
     const nodeStyle = {
         border: '2px solid black',
@@ -15,14 +15,14 @@ function QueryNode({data, selected}){
         fontSize: '0.7rem',
         backgroundColor: 'white',
         borderRadius: 4,
-        borderColor: selected ? 'green' : 'black'
+        borderColor: props.selected ? 'green' : 'black'
     };
 
     return (
         <div className="query-node" style={nodeStyle}>
             <Handle type='source' position="top"/>
             <Handle type='target' position="bottom"/>
-            {data.label}
+            {props.data.label}
             <SlideBar progress={0}></SlideBar>
         </div>
     );
