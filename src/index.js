@@ -2,7 +2,6 @@
 import React, { useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-/*import App from './App';*/
 import reportWebVitals from './reportWebVitals';
 import ReactFlow, {
   addEdge,
@@ -13,17 +12,22 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 import {nodesInit, edgesInit} from './initial-elements';
-import QueryStepNode from './QueryStepNode.js';
+import QueryNode from './QueryNode.js';
+import QueryLeaf from './QueryLeaf';
+import {
+  protoplan_to_graph
+} from './parser';
+import PlanGraphWithMetrics from './PlanGraphWithMetrics';
 
-
-const nodeTypes = { queryStepNode: QueryStepNode };
+const nodeTypes = { queryNode: QueryNode,
+                    queryLeaf: QueryLeaf };
 
 //TODO: Mettre dans un css
 const graphStyle = { backgroundColor: '#B8CEFF' };
 const pageStyle = { width: "100%", height: "800px" };
 
 function App(){
-  const [idCount, setIdCount] = useState(4);
+  const [idCount, setIdCount] = useState(5);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodesInit);
   const [edges, setEdges, onEdgesChange] = useEdgesState(edgesInit);
@@ -35,26 +39,9 @@ function App(){
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  function addNode(nodeName){
-    const nodesCopy = nodes.slice();
-    nodesCopy.push({
-      id: idCount,
-      type: "queryStepNode",
-      data: {
-        label: nodeName
-      },
-      position: { x: 0, y: 0}
-    })
-
-    console.log(nodesCopy);
-
-    setNodes(nodesCopy);
-    setIdCount(idCount+1)
-  }
-
-  const getLayoutedElements = (nodes, edges, direction = 'BT') => {
-    const isHorizontal = direction === 'LR';
-    dagreGraph.setGraph({ rankdir: direction, align: 'DL'});
+  //Lays out a graph composed of #nodes and #edges
+  const layoutElements = (nodes, edges) => {
+    dagreGraph.setGraph({ rankdir: 'BT', align: 'DR'});
   
     nodes.forEach((node) => {
       dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -68,8 +55,8 @@ function App(){
   
     nodes.forEach((node) => {
       const nodeWithPosition = dagreGraph.node(node.id);
-      node.targetPosition = isHorizontal ? 'left' : 'top';
-      node.sourcePosition = isHorizontal ? 'right' : 'bottom';
+      node.targetPosition =  'top';
+      node.sourcePosition =  'bottom';
   
       // We are shifting the dagre node position (anchor=center center) to the top left
       // so it matches the React Flow node anchor point (top left).
@@ -77,66 +64,163 @@ function App(){
         x: nodeWithPosition.x - nodeWidth / 2,
         y: nodeWithPosition.y - nodeHeight / 2,
       };
-  
-      return node;
     });
-  
     return { nodes, edges };
   };
 
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-    nodesInit,
-    edgesInit
-  );
+  layoutElements(nodesInit, edgesInit);
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, type: ConnectionLineType.SmoothStep, animated: true }, eds)),
-    []
-  );
+  /*const addNode = (nodeName) => {
+    const nodesCopy = nodes.slice();
+    nodesCopy.push({
+      id: idCount,
+      type: "queryNode",
+      data: {
+        label: nodeName
+      },
+      position: { x: 0, y: 0}
+    })
 
-  const onLayout = useCallback(
-    (direction) => {
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        nodes,
-        edges,
-        direction
-      );
-
-      setNodes([...layoutedNodes]);
-      setEdges([...layoutedEdges]);
-    },
-    [nodes, edges]
-  );
-
-
+    setNodes(nodesCopy);
+    setIdCount(idCount+1);
+  }*/
 
   //Query management
   let sparqlRequest = {
     "query": "SELECT * { ?s ?p ?o }",
-    "defaultGraph": "http://example.org/test"
+    "defaultGraph": "http://example.org/bsbm"
   };
 
   let sparqlServer = "http://localhost:8000/sparql";
 
-  const [initialQuery, setInitialQuery] = useState(null);
-  const [queryInput, setQueryInput] = useState("");
+  const [nextLink, setNextLink] = useState(null);
+  const [queryInput, setQueryInput] = useState(JSON.stringify(sparqlRequest));
+  const [exportMetric, setExportMetric] = useState("");
+  const [importMetric, setImportMetric] = useState("");
+  const [cardinalityMetric, setCardinalityMetric] = useState("");
+  const [costMetric, setCostMetric] = useState("");
+  const [coverageMetric, setCoverageMetric] = useState("");
+  const [progressionMetric, setProgressionMetric] = useState("");
+ 
 
-  const changeQuery = (event) => {
-    setQueryInput(event.target.value);
+  //Takes an array of graph elements (nodes and edges) and sets it as the displayed graph, and updates nodes and edges arrays accordingly
+  const elementsToNodesAndEdges = (graph) => {
+
+  var newNodes = [];
+  var newEdges = [];
+
+    graph.forEach(element => {
+      if(element.position !== undefined){
+
+        newNodes.push(element);
+      
+      } else {
+
+        newEdges.push(element);
+      
+      }
+    })
+
+    layoutElements(newNodes, newEdges);
+
+    setNodes(newNodes);
+    setEdges(newEdges);
+
   }
 
-  const commitQuery = (query) => {
-    //Starts the process of parsing the query and sending the query to the SaGe server 
-    console.log(query);
-    alert("Not implemented yet!");
+  const updateStats = (queryStats) => {
+    setExportMetric(queryStats["export"]);
+    setImportMetric(queryStats["import"]);
+    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
+    setCostMetric(queryStats["metrics"]["cost"]);
+    setCoverageMetric(queryStats["metrics"]["coverage"]);
+    setProgressionMetric(queryStats["metrics"]["progression"]);
+  }
+
+  const stats={
+   exportMetric: exportMetric,
+   importMetric: importMetric,
+   cardinalityMetric: cardinalityMetric,
+   costMetric: costMetric,
+   coverageMetric: coverageMetric,
+   progressionMetric: progressionMetric, 
+  }
+
+  //Starts the process of parsing the query and sending the query to the SaGe server 
+  const commitQuery = (q) => {
+    console.log("Running : ", q);
+
+    let fetchData = {
+      method: 'POST',
+      body: q,
+      headers: {
+        "Content-type": "application/json",
+        "accept": "application/json"
+      }
+    }
+    
+    fetch(sparqlServer, fetchData)
+    .then(res => res.json())
+    .then(data => {
+
+      console.log("data: ", data);
+      
+      let graphElements = protoplan_to_graph(data["next"]);
+      elementsToNodesAndEdges(graphElements);
+      
+      console.log(data["hasNext"]);
+
+      console.log("Response's next link", data["next"]);
+
+      setNextLink(data["next"]);
+
+      updateStats(data["stats"]);
+      
+    })
+    .catch(error => {console.log("CATCHPHRASE"); console.log(error)});
+  }
+
+  const commitNext = () => {
+
+
+    //From the initial query
+    const queryTemp = JSON.parse(queryInput);
+    //We add the next link to the query object, so that once sent, the SaGe server knows where it last stopped
+    queryTemp["next"] = nextLink;
+
+    let fetchInstructions = {
+      method: 'POST',
+      body: JSON.stringify(queryTemp),
+      headers: {
+        "Content-type": "application/json",
+        "accept": "application/json"
+      }
+    }
+
+    console.log("Next fetch instructions: ", fetchInstructions);
+
+    fetch(sparqlServer, fetchInstructions)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Response: ", data);
+      setNextLink(data["next"]);
+
+
+      if(data["next"] !== null){
+        let graphElements = protoplan_to_graph(data["next"]);
+        elementsToNodesAndEdges(graphElements);
+      }
+      updateStats(data["stats"]);
+    })
+    .catch((error) => {console.log(error)});
   }
 
   return(
       <div className="App" style={pageStyle}>
         <h1>Query Change Monitoring</h1>
-        <h2>Prototype and bidouillage</h2>
+        <h2>Prototype</h2>
 
-        <input placeholder='Query' type="text" name="QueryTextInput" value={queryInput} onChange={(e) => changeQuery(e)}></input>
+        <input placeholder='Query' type="text" name="QueryTextInput" value={queryInput} onChange={(e) => setQueryInput(e.target.value)}></input>
 
         <br></br>
         <br></br>
@@ -146,18 +230,10 @@ function App(){
         <br></br>
         <br></br>
 
-        <input placeholder='Node Name' type="text" name="NodeNameTextInput" value={text} onSubmit onChange={(e) => changeText(e.target.value)}></input>
+        <button onClick={() => commitNext()}>debug button</button>
 
-        <br></br>
-        <br></br>
-        
-        <button onClick={() => addNode(text)}>add a node</button>
-
-        <br></br>
-        <br></br>
-
-        <ReactFlow edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls></Controls></ReactFlow>
-      </div>
+        <ReactFlow className='MainGraph' edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls/></ReactFlow>
+       </div>
   )
 }
 
@@ -167,6 +243,9 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );  
+
+//<ReactFlow className='MainGraph' edges={edges} nodes={nodes} onNodesChange={onNodesChange} nodeTypes={nodeTypes} style={graphStyle} fitView><Controls/></ReactFlow>
+//<PlanGraphWithMetrics props={stats} nodes={nodes} edges={edges} onNodesChange={onNodesChange}/>
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

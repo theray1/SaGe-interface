@@ -1,15 +1,9 @@
-
-import position from 'dagre/lib/position';
-import React from 'react';
-import { MarkerType } from 'react-flow-renderer';
-import QueryStepNode from './QueryStepNode';
-
 const defaultPosition = { x: 0, y: 0}; 
 
 export const nodesInit = [
   {
     id: "1",
-    type: 'queryStepNode',
+    type: 'queryNode',
     data: {
       label: "Test node 1",
       progress: "1",
@@ -20,7 +14,7 @@ export const nodesInit = [
   },
   {
     id: "2",
-    type: 'queryStepNode',
+    type: 'queryNode',
     data: { 
       label: "Test node 2",
       progress: "100",
@@ -30,7 +24,7 @@ export const nodesInit = [
   },
   {
     id: "3",
-    type: 'queryStepNode',
+    type: 'queryNode',
     data: { 
       label: "Test node 3",
       progress: "50",
@@ -40,7 +34,7 @@ export const nodesInit = [
   },
   {
     id: "4",
-    type: 'queryStepNode',
+    type: 'queryNode',
     data: {
       label: "Default Node",
       progress: "0",

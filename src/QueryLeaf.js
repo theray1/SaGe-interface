@@ -3,7 +3,7 @@ import { Handle } from "react-flow-renderer";
 import SlideBar from "./SlideBar";
 
 
-function QueryStepNode({data, selected}){
+function queryLeaf({data, selected}){
 
     const nodeStyle = {
         border: '2px solid black',
@@ -18,14 +18,21 @@ function QueryStepNode({data, selected}){
         borderColor: selected ? 'green' : 'black'
     };
 
+    const d = data;
+    const test = Math.floor(100 * data.patternProduced / data.cardinality);
+
     return (
-        <div className="custom-node" style={nodeStyle}>
+        <div className="query-leaf" style={nodeStyle}>
             <Handle type='source' position="top"/>
             <Handle type='target' position="bottom"/>
-            {data.nodetype}
-            <SlideBar progress={data.progress}></SlideBar>
+            {data.label}
+            <br/>
+            {data.cardinality}
+            <br/>
+            {data.cumulativeCardinality}
+            <SlideBar progress={test}></SlideBar>
         </div>
     );
 }
 
-export default QueryStepNode;
+export default queryLeaf;
