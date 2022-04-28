@@ -24,10 +24,10 @@ function queryLeaf(props){
             <Handle type='target' position="bottom"/>
             {props.data.label}
             <br/>
-            {props.data.cardinality}
+            cardinality: {props.data.cardinality}
             <br/>
-            {props.data.cumulativeCardinality}
-            <SlideBar progress={Math.floor(100 * props.data.patternProduced / props.data.cardinality)}></SlideBar>
+            patternProduced: {props.data.patternProduced}
+            <SlideBar progress={0}></SlideBar>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-//TODO: Clean les imports
+//Currently not in use
 import './index.css';
 import ReactFlow, {
   addEdge,

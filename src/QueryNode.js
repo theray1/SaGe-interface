@@ -3,7 +3,7 @@ import { Handle } from "react-flow-renderer";
 import SlideBar from "./SlideBar";
 
 
-function QueryNode(props){
+const QueryNode = (props) => {
 
     const nodeStyle = {
         border: '2px solid black',
@@ -22,8 +22,7 @@ function QueryNode(props){
         <div className="query-node" style={nodeStyle}>
             <Handle type='source' position="top"/>
             <Handle type='target' position="bottom"/>
-            {props.data.label}
-            <SlideBar progress={0}></SlideBar>
+            {props.content}
         </div>
     );
 }

@@ -3,7 +3,7 @@ import {Buffer} from 'buffer';
 var proto = require('./iterators_pb');
 
 
-const leaf = ['scanSource', 'insertSource', 'deleteSource', 'valueLeft', 'valuesRight', 'scanLeft', 'scanRight', 'deleteLeft', 'deleteRight', 'insertLeft', 'insertRight'];
+const leaf = ['valuesSource', 'scanSource', 'insertSource', 'deleteSource', 'valuesLeft', 'valuesRight', 'scanLeft', 'scanRight', 'deleteLeft', 'deleteRight', 'insertLeft', 'insertRight'];
 const is_leaf = (op) => {
   return leaf.includes(op);
 }
@@ -12,6 +12,89 @@ const node = ['projSource', 'joinSource', 'unionSource', 'filterSource', 'projLe
 const is_node = (op) => {
   return node.includes(op);
 }
+
+const node_factory = (obj, key, id) => {
+  var node = {
+    id: id.toString(),
+    type: 'default',
+    position: {x: 0, y: 0},
+    data: {},
+    deducedData: {}
+  };
+
+  console.log(obj);
+
+  if(key == 'projSource' || key == 'projLeft' || key == 'projRight'){//Projection
+    node.type = 'projectionNode';
+    node.data = {
+      label: 'Projection',
+      valuesList: obj[key].valuesList
+    };
+  }
+  else if(key == 'joinSource' || key == 'joinLeft' || key == 'joinRight'){//Join
+    node.type = 'joinNode';
+    node.data = {
+      label: 'Join',
+      mucMap: obj[key].mucMap
+    };  
+  }
+  else if(key == 'unionSource' || key == 'unionLeft' || key == 'unionRight'){//Union
+    node.type = 'unionNode';
+    node.data = {
+      label: 'Union',
+    };
+  }
+  else if(key == 'filterSource' || key == 'filterLeft' || key == 'filterRight'){//Filter
+    node.type = 'filterNode';
+    node.data = {
+      label: 'Filter',
+      expression: obj[key].expression,
+      muMap: obj[key].muMap,
+      consumed: obj[key].consumed,
+      produced: obj[key].produced
+    };
+  }
+  else if(key == 'scanSource' || key == 'scanLeft' || key == 'scanRight'){//Scan
+    node.type = 'scanNode';
+    node.data = {
+      label: 'Scan',
+      cardinality: obj[key].cardinality,
+      cumulativeCardinality: obj[key].cumulativeCardinality,
+      lastRead: obj[key].lastRead,
+      muMap: obj[key].muMap,
+      mucMap: obj[key].mucMap,
+      pattern: obj[key].pattern,
+      patternCardinality: obj[key].patternCardinality,
+      patternProduced: obj[key].patternProduced,
+      produced: obj[key].produced,
+      stages: obj[key].stages
+    };
+  }
+  else if(key == 'valuesSource' || key == 'valuesLeft' || key == 'valuesRight'){//Values
+    node.type = 'valuesNode';
+    node.data = {
+      label: 'Values',
+    }
+  }
+  else if(key == 'insertSource' || key == 'insertLeft' || key == 'insertRight'){//Insert
+    node.type = 'insertNode';
+    node.data = {
+      label: 'Insertion',
+      nbInserted: obj[key].nbInserted
+    };
+  }
+  else if(key == 'deleteSource' || key == 'deleteLeft' || key == 'deleteRight'){//Delete
+    node.type = 'deleteNode';
+    node.data = {
+      label: 'Deletion',
+      nbInserted: obj[key].nbInserted
+    };
+  }
+
+  return node;
+}
+
+
 
 const plan_request_to_graph = (obj) => {
   var nodes = [];
@@ -23,49 +106,18 @@ const plan_request_to_graph = (obj) => {
     var [o, parentId] = queue.shift();
 
 
-    console.log("o: ", o);
-    console.log("parentId: ", parentId);
+    //console.log("o: ", o);
+    //console.log("parentId: ", parentId);
     
     
     for (var key in o){
     
       if (o[key] !== undefined && (is_node(key) || is_leaf(key))){
-  
-        
-        if(is_node(key)){
-          nodes.push({
-            id: id.toString(),
-            type: 'queryNode',
-            position: {x: 200, y: 200},
-            data: {
-              label: key,
-            }
-          });
-        }
-        
-        if(is_leaf(key)){
-          nodes.push({
-            id: id.toString(),
-            type: 'queryLeaf',
-            position: {x: 200, y: 200},
-            data: {
-              label: key,
-              cardinality: o[key]["cardinality"], 
-              cumulativeCardinality: o[key]["cumulativeCardinality"],
-              lastRead: o[key]["lastRead"],
-              MediaKeyStatusMapmucMap: o[key]["MediaKeyStatusMapmucMap"],
-              pattern: o[key]["pattern"],
-              patternCardinality: o[key]["patternCardinality"],
-              patternProduced: o[key]["patternProduced"],
-              produced: o[key]["produced"],
-              stages: o[key]["stages"],
-              timestamp: o[key]["timestamp"]
-            }
-          });
-        }
+
+        nodes.push(node_factory(o, key, id));
 
         queue.push([o[key], id]);
-        console.log("queue: ", queue);
+        //console.log("queue: ", queue);
 
         if(parentId !== null){
           edges.push({
@@ -83,12 +135,12 @@ const plan_request_to_graph = (obj) => {
 }
 
 export function protoplan_to_graph(plan) {
-  console.log("plan :", plan);
+  //console.log("plan :", plan);
   var decodeplan = Buffer.from(plan, 'base64');
-  console.log("decodeplan :", decodeplan);
+  //console.log("decodeplan :", decodeplan);
   var jsonplan = proto.RootTree.deserializeBinary(new Uint8Array(decodeplan)).toObject();
   console.log("jsonplan :", jsonplan);
   const graph = plan_request_to_graph(jsonplan);
-  console.log("Generated Graph", graph);
+  //console.log("Generated Graph", graph);
   return graph;
 }

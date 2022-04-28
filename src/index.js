@@ -12,22 +12,35 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 import {nodesInit, edgesInit} from './initial-elements';
-import QueryNode from './QueryNode.js';
-import QueryLeaf from './QueryLeaf';
 import {
   protoplan_to_graph
 } from './parser';
 import PlanGraphWithMetrics from './PlanGraphWithMetrics';
+import ProjectionNode from './ProjectionNode';
+import JoinNode from './JoinNode';
+import UnionNode from './UnionNode';
+import FilterNode from './FilterNode';
+import ScanNode from './ScanNode';
+import ValuesNode from './ValuesNode';
+import InsertNode from './InsertNode';
+import DeleteNode from './DeleteNode';
 
-const nodeTypes = { queryNode: QueryNode,
-                    queryLeaf: QueryLeaf };
+const nodeTypes = { projectionNode: ProjectionNode,
+                    joinNode: JoinNode,
+                    unionNode: UnionNode,
+                    filterNode: FilterNode,
+                    scanNode: ScanNode,
+                    valuesNode: ValuesNode,
+                    insertNode: InsertNode,
+                    deleteNode: DeleteNode};
 
 function App(){
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(nodesInit);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(edgesInit);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const [isQueryEditable, setIsQueryEditable] = useState(true);
+  const [hasPlanBeenModified, setHasPlanBeenModified] = useState(false);
 
   const nodeWidth = 200;
   const nodeHeight = 150;
@@ -64,24 +77,13 @@ function App(){
     return { nodes, edges };
   };
 
-  layoutElements(nodesInit, edgesInit);
-
   //Query management
   let sparqlRequest = {
-    "query": "SELECT * { ?s ?p ?o }",
+    "query": "PREFIX p1: <http://www.w3.org/2000/01/rdf-schema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/2001/XMLSchema#> SELECT ?label WHERE { ?s p2:date '2000-07-15'^^p3:date; p1:label ?label . FILTER regex(?label, 't', 'i') }",
     "defaultGraph": "http://example.org/bsbm"
   };
 
   let sparqlServer = "http://localhost:8000/sparql";
-
-  const [nextLink, setNextLink] = useState(null);
-  const [queryInput, setQueryInput] = useState(JSON.stringify(sparqlRequest));
-  const [exportMetric, setExportMetric] = useState("");
-  const [importMetric, setImportMetric] = useState("");
-  const [cardinalityMetric, setCardinalityMetric] = useState("");
-  const [costMetric, setCostMetric] = useState("");
-  const [coverageMetric, setCoverageMetric] = useState("");
-  const [progressionMetric, setProgressionMetric] = useState("");
  
 
   //Takes an array of graph elements (nodes and edges) and sets it as the displayed graph, and updates nodes and edges arrays accordingly
@@ -109,22 +111,31 @@ function App(){
 
   }
 
-  const updateStats = (queryStats) => {
-    setExportMetric(queryStats["export"]);
-    setImportMetric(queryStats["import"]);
-    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
-    setCostMetric(queryStats["metrics"]["cost"]);
-    setCoverageMetric(queryStats["metrics"]["coverage"]);
-    setProgressionMetric(queryStats["metrics"]["progression"]);
-  }
+  //Very optimizable
+  const updateNodesFromElements = (graph) => {
+    var newNodes = [];
 
-  const stats={
-   exportMetric: exportMetric,
-   importMetric: importMetric,
-   cardinalityMetric: cardinalityMetric,
-   costMetric: costMetric,
-   coverageMetric: coverageMetric,
-   progressionMetric: progressionMetric, 
+    graph.forEach(element => {
+      if(element.position !== undefined){
+
+        newNodes.push(element);
+      
+      }
+    })
+
+    newNodes.forEach((newNode) =>{
+      var oldPosition = {x: 0, y: 0};
+
+      nodes.forEach((oldNode) =>{
+        if(oldNode.id == newNode.id){
+          oldPosition = oldNode.position;
+        }
+      })
+
+      newNode.position = oldPosition;
+    });
+
+    setNodes(newNodes);
   }
 
   //Starts the process of parsing the query and sending the query to the SaGe server 
@@ -164,7 +175,6 @@ function App(){
 
   const commitNext = () => {
 
-
     //From the initial query
     const queryTemp = JSON.parse(queryInput);
     //We add the next link to the query object, so that once sent, the SaGe server knows where it last stopped
@@ -187,25 +197,61 @@ function App(){
       console.log("Response: ", data);
       setNextLink(data["next"]);
 
-
       if(data["next"] !== null){
-        let graphElements = protoplan_to_graph(data["next"]);
-        elementsToNodesAndEdges(graphElements);
-      } else {
+
+        if(!hasPlanBeenModified){//The query isn't over and user hasn't modified the query execution plan since the last quantum
+          
+          let graphElements = protoplan_to_graph(data["next"]);
+          updateNodesFromElements(graphElements);
+        
+        } else {//The query isn't over but user has modified the query execution plan since the last quantum
+        
+          console.log("How did you get there? Query exec plan modification isn't implemented yet...")
+          let graphElements = protoplan_to_graph(data["next"]);
+          elementsToNodesAndEdges(graphElements);
+        }
+        
+      } else {//Query is over
+        
         setIsQueryEditable(true);
+      
       }
+
       updateStats(data["stats"]);
+      setHasPlanBeenModified(false);
     })
+
     .catch((error) => {console.log(error)});
   }
 
-  const graphProps = {
-    onNodesChange: onNodesChange,
-    stats: stats
+  const [nextLink, setNextLink] = useState(null);
+  const [queryInput, setQueryInput] = useState(JSON.stringify(sparqlRequest));
+  const [exportMetric, setExportMetric] = useState("");
+  const [importMetric, setImportMetric] = useState("");
+  const [cardinalityMetric, setCardinalityMetric] = useState("");
+  const [costMetric, setCostMetric] = useState("");
+  const [coverageMetric, setCoverageMetric] = useState("");
+  const [progressionMetric, setProgressionMetric] = useState("");
+
+  const updateStats = (queryStats) => {
+    setExportMetric(queryStats["export"]);
+    setImportMetric(queryStats["import"]);
+    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
+    setCostMetric(queryStats["metrics"]["cost"]);
+    setCoverageMetric(queryStats["metrics"]["coverage"]);
+    setProgressionMetric(queryStats["metrics"]["progression"]);
   }
 
+  const stats={
+   exportMetric: exportMetric,
+   importMetric: importMetric,
+   cardinalityMetric: cardinalityMetric,
+   costMetric: costMetric,
+   coverageMetric: coverageMetric,
+   progressionMetric: progressionMetric, 
+  }
 
-  //TODO: Mettre dans un css
+  //TODO: Move this to a css file if possible
   const mainGraphStyle = { width: "100%", height: "100%", backgroundColor: '#B8CEFF' };
   const mainGraphWithMetricsStyle = { width: "100%", height: "66%" };
   const appStyle = { width: "100%", height: "100vh" }
@@ -228,6 +274,9 @@ function App(){
 
       <button onClick={() => commitNext()}>debug button</button>
     </div>
+
+    
+
     <div className="MainGraphWithMetrics" style={mainGraphWithMetricsStyle}>
         <div className="Metrics" style={metricsStyle}>
             export:{stats.exportMetric}<br/>

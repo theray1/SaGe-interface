@@ -37,11 +37,6 @@ const ProgressBar = (props) => {
 };
 
 function SlideBar(props) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => { setProgress(Math.floor(Math.random() * 100) + 1) }, []);
-
-
   return (
     <div className="SlideBar">
       <ProgressBar bgcolor={/*"#6a1b9a"*/"red"} progress={props.progress} />
