@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import { Handle } from "react-flow-renderer";
-import QueryNode from "./QueryNode";
-import SlideBar from "./SlideBar";
+import ContainerNode from "./ContainerNode";
 
 
 function JoinNode(props){
@@ -9,13 +8,12 @@ function JoinNode(props){
     const content = <div className="query-node">
     <Handle type='source' position="top"/>
     <Handle type='target' position="bottom"/>
-    Label: {props.data.label}<br/>
-    mucMap: {props.data.mucMap}
+    mucMap: <br/>{props.data.mucMap}
 </div>
 
-    return (
-        <QueryNode content={content}></QueryNode>
-    );
+return (
+    <ContainerNode content={content} childProps={props}></ContainerNode>  
+  );
 }
 
 export default JoinNode;

@@ -6,10 +6,9 @@ const ProgressBar = (props) => {
 
   const containerStyles = {
     height: 20,
-    width: "80%",
-    /*backgroundColor: "#e0e0de",*/
-    /*borderRadius: 50,*/
-    margin: 20,
+    width: "100%",
+    backgroundColor: "black",
+    borderRadius: 50,
   };
 
   const fillerStyles = {
@@ -18,19 +17,19 @@ const ProgressBar = (props) => {
     backgroundColor: bgcolor,
     borderRadius: "inherit",
     textAlign: "right",
-    /*transition: 'width 1s ease-in-out',*/
+    transition: 'width 1s ease-in-out',
   };
 
   const labelStyles = {
     padding: 5,
-    color: "black",
+    color: "white",
     fontWeight: "bold",
   };
 
   return (
-    <div style={containerStyles}>
-      <div style={fillerStyles}>
-        <span style={labelStyles}>{`${progress}%`}</span>
+    <div className="Container" style={containerStyles}>
+      <div className="Filler" style={fillerStyles}>
+        <span className="Label" style={labelStyles}>{Math.floor(progress)}%</span>
       </div>
     </div>
   );
@@ -39,7 +38,7 @@ const ProgressBar = (props) => {
 function SlideBar(props) {
   return (
     <div className="SlideBar">
-      <ProgressBar bgcolor={/*"#6a1b9a"*/"red"} progress={props.progress} />
+      <ProgressBar bgcolor={"#80036d"} progress={props.progress} />
     </div>
   );
 }

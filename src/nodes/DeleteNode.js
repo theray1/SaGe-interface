@@ -1,20 +1,19 @@
 import React, { useCallback } from "react";
 import { Handle } from "react-flow-renderer";
-import QueryNode from "./QueryNode";
-import SlideBar from "./SlideBar";
+import ContainerNode from "./ContainerNode";
 
 
-function ValuesNode(props){
+function DeleteNode(props){
 
     const content = <div className="query-node">
     <Handle type='source' position="top"/>
     <Handle type='target' position="bottom"/>
-    Label: {props.data.label}<br/>
+    nbInserted: <br/>{props.data.nbInserted}<br/>
 </div>
 
-    return (
-        <QueryNode content={content}></QueryNode>
-    );
+return (
+    <ContainerNode content={content} childProps={props}></ContainerNode>  
+  );
 }
 
-export default ValuesNode;
+export default DeleteNode;

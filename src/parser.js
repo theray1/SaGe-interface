@@ -22,29 +22,29 @@ const node_factory = (obj, key, id) => {
     deducedData: {}
   };
 
-  console.log(obj);
+  //console.log(obj);
 
-  if(key == 'projSource' || key == 'projLeft' || key == 'projRight'){//Projection
+  if(key === 'projSource' || key === 'projLeft' || key === 'projRight'){//Projection
     node.type = 'projectionNode';
     node.data = {
       label: 'Projection',
       valuesList: obj[key].valuesList
     };
   }
-  else if(key == 'joinSource' || key == 'joinLeft' || key == 'joinRight'){//Join
+  else if(key === 'joinSource' || key === 'joinLeft' || key === 'joinRight'){//Join
     node.type = 'joinNode';
     node.data = {
       label: 'Join',
       mucMap: obj[key].mucMap
     };  
   }
-  else if(key == 'unionSource' || key == 'unionLeft' || key == 'unionRight'){//Union
+  else if(key === 'unionSource' || key === 'unionLeft' || key === 'unionRight'){//Union
     node.type = 'unionNode';
     node.data = {
       label: 'Union',
     };
   }
-  else if(key == 'filterSource' || key == 'filterLeft' || key == 'filterRight'){//Filter
+  else if(key === 'filterSource' || key === 'filterLeft' || key === 'filterRight'){//Filter
     node.type = 'filterNode';
     node.data = {
       label: 'Filter',
@@ -54,36 +54,36 @@ const node_factory = (obj, key, id) => {
       produced: obj[key].produced
     };
   }
-  else if(key == 'scanSource' || key == 'scanLeft' || key == 'scanRight'){//Scan
+  else if(key === 'scanSource' || key === 'scanLeft' || key === 'scanRight'){//Scan
     node.type = 'scanNode';
     node.data = {
       label: 'Scan',
-      cardinality: obj[key].cardinality,
+      cardinality: obj[key].cardinality, //le nombre de patternes pour une instance
       cumulativeCardinality: obj[key].cumulativeCardinality,
       lastRead: obj[key].lastRead,
       muMap: obj[key].muMap,
       mucMap: obj[key].mucMap,
       pattern: obj[key].pattern,
-      patternCardinality: obj[key].patternCardinality,
-      patternProduced: obj[key].patternProduced,
-      produced: obj[key].produced,
+      patternCardinality: obj[key].patternCardinality, //le nombre de patternes pour toutes les instances cumulées
+      patternProduced: obj[key].patternProduced, //le nombre de patternes produits lors d'une recherche pour toutes les instances
+      produced: obj[key].produced, //le nombres patternes produits lors d'une recherche pour une instance
       stages: obj[key].stages
     };
   }
-  else if(key == 'valuesSource' || key == 'valuesLeft' || key == 'valuesRight'){//Values
+  else if(key === 'valuesSource' || key === 'valuesLeft' || key === 'valuesRight'){//Values
     node.type = 'valuesNode';
     node.data = {
       label: 'Values',
     }
   }
-  else if(key == 'insertSource' || key == 'insertLeft' || key == 'insertRight'){//Insert
+  else if(key === 'insertSource' || key === 'insertLeft' || key === 'insertRight'){//Insert
     node.type = 'insertNode';
     node.data = {
       label: 'Insertion',
       nbInserted: obj[key].nbInserted
     };
   }
-  else if(key == 'deleteSource' || key == 'deleteLeft' || key == 'deleteRight'){//Delete
+  else if(key === 'deleteSource' || key === 'deleteLeft' || key === 'deleteRight'){//Delete
     node.type = 'deleteNode';
     node.data = {
       label: 'Deletion',
