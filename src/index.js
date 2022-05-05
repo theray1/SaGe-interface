@@ -33,19 +33,22 @@ const nodeTypes = { projectionNode: ProjectionNode,
                     scanNode: ScanNode,
                     valuesNode: ValuesNode,
                     insertNode: InsertNode,
-  
-  
                     deleteNode: DeleteNode};
 
 function App(){
 
-  // SELECT ?s ?p ?o WHERE { ?s ?p ?o }
+
+  //bsbm10
+  //"query": "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
   //"query": "PREFIX p1: <http://www.w3.org/2000/01/rdf-schema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/2001/XMLSchema#> SELECT ?label WHERE { ?s p2:date '2000-07-15'^^p3:date; p1:label ?label . FILTER regex(?label, 't', 'i') }",
     
+  //bsbm1k
+  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> SELECT ?s ?p ?o WHERE { ?s p2:date ?date . FILTER (?date > '2004-01-01'^^p1:date) }"
+  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> SELECT ?s ?p ?o WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) }",
 
   //Query management
   let sparqlRequest = {
-    "query": "PREFIX p1: <http://www.w3.org/2000/01/rdf-schema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/2001/XMLSchema#> SELECT ?label WHERE { ?s p2:date '2000-07-15'^^p3:date; p1:label ?label}",
+    "query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> PREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/> SELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor p5:Product151 . } } }",
     "defaultGraph": "http://example.org/bsbm"
   };
 
@@ -62,12 +65,47 @@ function App(){
   const [isQueryEditable, setIsQueryEditable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
+  const [stopAutoRun, setStopAutoRun] = useState(false);
 
   const nodeWidth = 300;
   const nodeHeight = 150;
 
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  const [exportMetric, setExportMetric] = useState("");
+  const [importMetric, setImportMetric] = useState("");
+  const [cardinalityMetric, setCardinalityMetric] = useState("");
+  const [costMetric, setCostMetric] = useState("");
+  const [coverageMetric, setCoverageMetric] = useState("");
+  const [progressionMetric, setProgressionMetric] = useState("");
+
+  const updateStats = (queryStats) => {
+    setExportMetric(queryStats["export"]);
+    setImportMetric(queryStats["import"]);
+    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
+    setCostMetric(queryStats["metrics"]["cost"]);
+    setCoverageMetric(queryStats["metrics"]["coverage"]);
+    setProgressionMetric(queryStats["metrics"]["progression"]);
+  }
+
+  const resetStats = () => {
+    setExportMetric(0);
+    setImportMetric(0);
+    setCardinalityMetric(0);
+    setCostMetric(0);
+    setCoverageMetric(0);
+    setProgressionMetric(0);
+  }
+
+  const stats={
+   exportMetric: exportMetric,
+   importMetric: importMetric,
+   cardinalityMetric: cardinalityMetric,
+   costMetric: costMetric,
+   coverageMetric: coverageMetric,
+   progressionMetric: progressionMetric, 
+  }
 
   //Lays out a graph composed of #nodes and #edges
   const layoutElements = (nodes, edges) => {
@@ -254,10 +292,10 @@ function App(){
     commitQuery().then(
       (response) => {
 
-        console.log("mmmh");
 
         setIsAutoRunOn(response["hasNext"]);
-
+  
+  
         if(response["hasNext"]){
           commitNextUntilQueryIsOver();      
         }
@@ -274,79 +312,80 @@ function App(){
 
   function commitNextUntilQueryIsOver(){
     commitNext().then((data) => {
-      setIsAutoRunOn(data["hasNext"]);
+      if(!stopAutoRun){
+        setIsAutoRunOn(data["hasNext"]);
+      } else {
+        setIsAutoRunOn(!isAutoRunOn);
+        setStopAutoRun(!stopAutoRun);
+      }
     });
   }
-  
-  const [exportMetric, setExportMetric] = useState("");
-  const [importMetric, setImportMetric] = useState("");
-  const [cardinalityMetric, setCardinalityMetric] = useState("");
-  const [costMetric, setCostMetric] = useState("");
-  const [coverageMetric, setCoverageMetric] = useState("");
-  const [progressionMetric, setProgressionMetric] = useState("");
 
-  const updateStats = (queryStats) => {
-    setExportMetric(queryStats["export"]);
-    setImportMetric(queryStats["import"]);
-    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
-    setCostMetric(queryStats["metrics"]["cost"]);
-    setCoverageMetric(queryStats["metrics"]["coverage"]);
-    setProgressionMetric(queryStats["metrics"]["progression"]);
-  }
-
-  const resetStats = () => {
-    setExportMetric(0);
-    setImportMetric(0);
-    setCardinalityMetric(0);
-    setCostMetric(0);
-    setCoverageMetric(0);
-    setProgressionMetric(0);
-  }
-
-  const stats={
-   exportMetric: exportMetric,
-   importMetric: importMetric,
-   cardinalityMetric: cardinalityMetric,
-   costMetric: costMetric,
-   coverageMetric: coverageMetric,
-   progressionMetric: progressionMetric, 
+  const handleAutoRunClick = () => {
+    if(nextLink == null){
+      if(isQueryEditable){
+        autoRunQuery();
+      }
+    } else {
+      commitNextUntilQueryIsOver();
+      setIsAutoRunOn(true);
+    }
   }
 
   return(
     <div className="App">
+      <div className="Header">
+        <div className="CreditsAndUsefulLinks">
+          <ul>
+            <li>
+              <a href="https://github.com/theray1/SaGe-interface">Project Github</a>
+            </li>
+            <li>
+              <a href="http://sage.univ-nantes.fr/">SaGe</a>
+            </li>
+          </ul>
+        </div>
 
-    <div className="Header">
-      <textarea rows={6} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => {if(isQueryEditable)setQueryInput(e.target.value)}}></textarea>
+        <div className="Inputs">
+          <textarea rows={10} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => {if(isQueryEditable)setQueryInput(e.target.value)}}></textarea>
 
-      <br></br>
-      <br></br>
+          <br/>
+          <br/>
 
-      <button id="commitQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button>
+          <table className="Buttons">
+            <tbody>
+              <tr className="ButtonsTable">
+                <th><button id="commitQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button></th>
+                <th><button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button></th>
+                <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
+                <th><button id='stopAutoRun' onClick={() => {setStopAutoRun(true)}}>Stop Auto-Run</button></th>
+              </tr>
+            </tbody>
+          </table>
 
-      <button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button>
-
-      <button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => {if(isQueryEditable)autoRunQuery();}}>Auto-Run Query</button>
-    </div>
+  
+        </div>
+      </div>
 
     
 
-    <div className="MainGraphWithMetrics">
-      <div className="MainGraph">
-        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
-      </div>
-      <div className="Metrics">
-        <div className="MetricsContent">
-          export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
-          import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
-          cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
-          cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
-          coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
-          progression:<br/>
-          <SlideBar progress={stats.progressionMetric * 100}/>
+      <div className="MainGraphWithMetrics">
+        <div className="MainGraph">
+          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
         </div>
-      </div>      
+        <div className="Metrics">
+          <div className="MetricsContent">
+            export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
+            import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
+            cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
+            cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
+            coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
+            progression:<br/>
+            <SlideBar progress={stats.progressionMetric * 100}/>
+          </div>
+        </div>      
+      </div>
     </div>
-  </div>
   )
 }
 

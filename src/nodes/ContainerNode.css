@@ -1,3 +1,26 @@
+/*.ContainerNode:focus-within {
+    border-color: greenyellow;
+    height: auto;
+    display: block;
+    width: 400px;
+    height: auto;
+    transform: translateX(-100px);
+}*/
+
+
+/*.ContainerNode:focus .DisplayData {
+    opacity: 1;
+    overflow: hidden;
+    height: max-content;
+
+    background-color: rgb(12, 22, 207);
+}*/
+
+.ContainedNode {
+    text-align: left;
+    pointer-events: none;
+}
+
 .ContainerNode {
     border: 2px solid black;
     text-align: center;
@@ -15,14 +38,36 @@
     transition: transform 0.5s, border-color 0.5s, width 0.5s, height 0.5s;
 }
 
-.ContainerNode:focus-within {
+.ContainerNodeFocused {
     border-color: greenyellow;
-    width: 300px;
-    height: 150px;
-    transform: translateX(-50px) translateY(-25px);
+    height: auto;
+    display: block;
+    width: 400px;
+    height: auto;
+    transform: translateX(-100px);
 }
 
-.Content {
-    text-align: left;
-    margin-left: 3%;
+.DisplayData {
+    opacity: 0;
+    overflow: hidden;
+    height: 0px;
+    background-color: white;
+
+    transition: opacity 0.5s, overflow 0.5s, height 10s;
+}
+
+.DisplayDataFocused {
+    opacity: 1;
+    overflow: hidden;
+    height: max-content;
+}
+
+.MainData {
+    margin: 0px;
+}
+
+.Label {
+    padding-top: 10%;
+    pointer-events: none;
+    font-size: 180%;
 }

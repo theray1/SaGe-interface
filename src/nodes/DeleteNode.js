@@ -5,10 +5,14 @@ import ContainerNode from "./ContainerNode";
 
 function DeleteNode(props){
 
-    const content = <div className="query-node">
+    const content = <div className="QueryNode">
+      <div className="Handles">
     <Handle type='source' position="top"/>
     <Handle type='target' position="bottom"/>
+    </div>
+    <div className="DataDisPlay">
     nbInserted: <br/>{props.data.nbInserted}<br/>
+    </div>
 </div>
 
 return (

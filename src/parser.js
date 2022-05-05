@@ -60,11 +60,11 @@ const node_factory = (obj, key, id) => {
       label: 'Scan',
       cardinality: obj[key].cardinality, //le nombre de patternes pour une instance
       cumulativeCardinality: obj[key].cumulativeCardinality,
+      patternCardinality: obj[key].patternCardinality, //le nombre de patternes pour toutes les instances cumulées
       lastRead: obj[key].lastRead,
       muMap: obj[key].muMap,
       mucMap: obj[key].mucMap,
       pattern: obj[key].pattern,
-      patternCardinality: obj[key].patternCardinality, //le nombre de patternes pour toutes les instances cumulées
       patternProduced: obj[key].patternProduced, //le nombre de patternes produits lors d'une recherche pour toutes les instances
       produced: obj[key].produced, //le nombres patternes produits lors d'une recherche pour une instance
       stages: obj[key].stages

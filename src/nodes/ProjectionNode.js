@@ -19,10 +19,14 @@ const ProjectionNode = (props) => {
       )
     }
 
-    const content = <div className="query-node">
-                        <Handle type='source' position="top"/>
-                        <Handle type='target' position="bottom"/>
+    const content = <div className="QueryNode">
+                        <div className="Handles">
+    <Handle type='source' position="top"/>
+    <Handle type='target' position="bottom"/>
+    </div>
+    <div className="DisplayData">
                         Projection sur les attributs: <br/>{cleanAttributeDisplay()}
+                    </div>
                     </div>
 
     return (

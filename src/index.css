@@ -1,13 +1,14 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   font-family: sans-serif;
   padding: 0px 0px 0px 0px;
+}
+
+html {
+  height: 100vh;
 }
 
 code {
@@ -20,46 +21,77 @@ textarea {
 
 .App {
   width: 100%;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
+}
+
+.Header {
+  display: flex;
+  resize: vertical;
+  overflow: hidden;
+}
+
+.CreditsAndUsefulLinks {
+  width: 25%;
+}
+
+.Inputs {
+  width: 75%;
+  background-color: rgb(130, 170, 202);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.QueryInput {
+  margin-top: 1%;
+  width: 50%;
+}
+
+.Buttons {
+  width: fit-content;
+  border-spacing: 5px;
+}
+
+.Buttons button:active {
+  background-color: #80036d;
+}
+
+.Buttons button {
+  border-radius: 12px;
+  transition: background-color 0.05s;
 }
 
 .MainGraphWithMetrics {
   width: 100%;
-  height: 80%;
+  display: flex;
+  flex-basis: 80%;
+  flex: 1;
 }
 
 .MainGraph {
   background-color: #B8CEFF;
   width: 85%;
-  height: 100%;
-  float: right;
 }
 
 .Metrics {
-  background-color: grey;
-  height: 100%;
+  background-color: rgb(185, 225, 215);
   width: 15%;
-  float: left;
-  position: relative
+  overflow: hidden;
 }
 
 .MetricsContent {
   width: 60%;
   text-align: center;
-  position: absolute;
+  position: relative;
   top: 50%;
   transform: translateY(-50%) translateX(-50%);
   left: 50%;
 }
 
-.QueryInput {
-  margin-top: 1%;
-  width: 30%;
-}
 
-.Header {
-  width: 100%;
-  height: 20%;
-}
+
+
 
 

@@ -5,10 +5,17 @@ import ContainerNode from "./ContainerNode";
 
 function JoinNode(props){
 
-    const content = <div className="query-node">
+    const content = <div className="QueryNode">
+    <div className="Handles">
     <Handle type='source' position="top"/>
     <Handle type='target' position="bottom"/>
+    </div>
+    <div className="DisplayData">
     mucMap: <br/>{props.data.mucMap}
+    </div>
+    <div className="MainData">
+      
+    </div>
 </div>
 
 return (
