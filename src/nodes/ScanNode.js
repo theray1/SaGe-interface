@@ -1,6 +1,8 @@
 import React, { useCallback } from "react";
 import { Handle } from "react-flow-renderer";
-import SlideBar from "../SlideBar";
+import NodeProgressSlideBar from "../slidebars/NodeProgressSlideBar";
+import QueryProgressSlideBar from "../slidebars/QueryProgressSlideBar";
+import SlideBar from "../slidebars/SlideBar";
 import ContainerNode from "./ContainerNode";
 
 function ScanNode(props){
@@ -17,7 +19,7 @@ function ScanNode(props){
     <Handle type='source' position="top"/>
     </div>
     <div className="MainData">
-      <SlideBar progress={coverage*100}/>
+      <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage*100}/>
     </div>
     <div className="DisplayData">
     

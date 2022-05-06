@@ -1,48 +1,28 @@
-/*.ContainerNode:focus-within {
-    border-color: greenyellow;
-    height: auto;
-    display: block;
-    width: 400px;
-    height: auto;
-    transform: translateX(-100px);
-}*/
-
-
-/*.ContainerNode:focus .DisplayData {
-    opacity: 1;
-    overflow: hidden;
-    height: max-content;
-
-    background-color: rgb(12, 22, 207);
-}*/
-
 .ContainedNode {
     text-align: left;
     pointer-events: none;
 }
 
 .ContainerNode {
-    border: 2px solid black;
+    border: 2px solid;
     text-align: center;
-    padding: 0;
-    padding-top: 10;
-    padding-bottom: 10;
-    font-size: 0.7rem;
+    font-size: 1rem;
     background-color: white;
     border-radius: 3%;
 
-    width: 200px;
-    height: 100px;
-    border-color: rebeccapurple;
+    width: 300px;
+    height: 130px;
+    border-color: rgb(226, 170, 234);
+    
 
-    transition: transform 0.5s, border-color 0.5s, width 0.5s, height 0.5s;
+    transition: border 0.5s, transform 0.5s, border-color 0.5s, width 0.5s, height 0.5s;
 }
 
 .ContainerNodeFocused {
-    border-color: greenyellow;
+    border: 5px solid rebeccapurple;
     height: auto;
     display: block;
-    width: 400px;
+    width: 500px;
     height: auto;
     transform: translateX(-100px);
 }
@@ -67,7 +47,7 @@
 }
 
 .Label {
-    padding-top: 10%;
     pointer-events: none;
     font-size: 180%;
+    padding-bottom: 15%;
 }

@@ -11,7 +11,6 @@ import ReactFlow, {
   useEdgesState,
 } from 'react-flow-renderer';
 import dagre from 'dagre';
-import {nodesInit, edgesInit} from './initial-elements';
 import {
   protoplan_to_graph
 } from './parser';
@@ -23,8 +22,9 @@ import ScanNode from './nodes/ScanNode';
 import ValuesNode from './nodes/ValuesNode';
 import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
-import SlideBar from './SlideBar';
+import SlideBar from './slidebars/SlideBar';
 import roundDownFiveDecimals from './util';
+import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -48,8 +48,8 @@ function App(){
 
   //Query management
   let sparqlRequest = {
-    "query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> PREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/> SELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor p5:Product151 . } } }",
-    "defaultGraph": "http://example.org/bsbm"
+    query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> PREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/> SELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }",
+    defaultGraph: "http://example.org/bsbm"
   };
 
   let sparqlServer = "http://localhost:8000/sparql";
@@ -67,7 +67,7 @@ function App(){
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
   const [stopAutoRun, setStopAutoRun] = useState(false);
 
-  const nodeWidth = 300;
+  const nodeWidth = 500;
   const nodeHeight = 150;
 
   const dagreGraph = new dagre.graphlib.Graph();
@@ -109,7 +109,7 @@ function App(){
 
   //Lays out a graph composed of #nodes and #edges
   const layoutElements = (nodes, edges) => {
-    dagreGraph.setGraph({ rankdir: 'BT', align: 'DR'});
+    dagreGraph.setGraph({ rankdir: 'BT', align: ''});
   
     nodes.forEach((node) => {
       dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -332,6 +332,13 @@ function App(){
     }
   }
 
+  const handleCommitQueryOnMouseDown = () => {
+    console.log(queryInput)
+    const queryWithoutUselessCharacters = queryInput.replace(/\r?\n|\r/g, "");
+    setQuery(queryWithoutUselessCharacters);
+    console.log(queryWithoutUselessCharacters);
+  }
+
   return(
     <div className="App">
       <div className="Header">
@@ -344,6 +351,10 @@ function App(){
               <a href="http://sage.univ-nantes.fr/">SaGe</a>
             </li>
           </ul>
+          <div className="About">
+            This project has been made possible thanks to: LS2N, Hala Skaf-Molli, Pascal Molli, Julien, Wang and Vincent. 
+            <br/>It has been realized during a two-month internship (April - May 2022) by Erwan Boisteau-Desdevises. 
+          </div>
         </div>
 
         <div className="Inputs">
@@ -355,10 +366,11 @@ function App(){
           <table className="Buttons">
             <tbody>
               <tr className="ButtonsTable">
-                <th><button id="commitQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button></th>
+                <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryOnMouseDown()} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button></th>
                 <th><button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button></th>
                 <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
                 <th><button id='stopAutoRun' onClick={() => {setStopAutoRun(true)}}>Stop Auto-Run</button></th>
+                <th><button id='debugButton' onClick={() => {console.log(queryInput)}}>Debug Button</button></th>
               </tr>
             </tbody>
           </table>
@@ -381,7 +393,7 @@ function App(){
             cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
             coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
             progression:<br/>
-            <SlideBar progress={stats.progressionMetric * 100}/>
+            <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
           </div>
         </div>      
       </div>

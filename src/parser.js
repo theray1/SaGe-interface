@@ -1,4 +1,5 @@
 import {Buffer} from 'buffer';
+import { MarkerType } from 'react-flow-renderer';
 
 var proto = require('./iterators_pb');
 
@@ -124,7 +125,15 @@ const plan_request_to_graph = (obj) => {
             id: 'e'+parentId+id,
             target: parentId.toString(),
             source: id.toString(),
-            animate: 'false'
+            animate: 'false',
+            type: 'smoothstep',
+            style: { stroke: 'red' },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 75,
+              height: 50,
+              color: "blue"
+            },
           })
         }
         id++;

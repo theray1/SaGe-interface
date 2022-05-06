@@ -34,11 +34,12 @@ textarea {
 
 .CreditsAndUsefulLinks {
   width: 25%;
+  background-color: rgb(226, 170, 234);
 }
 
 .Inputs {
   width: 75%;
-  background-color: rgb(130, 170, 202);
+  background-color: rgb(226, 196, 234);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,12 +72,12 @@ textarea {
 }
 
 .MainGraph {
-  background-color: #B8CEFF;
+  background-color: #c3c6cd;
   width: 85%;
 }
 
 .Metrics {
-  background-color: rgb(185, 225, 215);
+  background-color: rgb(226, 170, 234);
   width: 15%;
   overflow: hidden;
 }
