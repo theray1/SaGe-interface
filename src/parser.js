@@ -127,10 +127,13 @@ const plan_request_to_graph = (obj) => {
             source: id.toString(),
             animate: 'false',
             type: 'smoothstep',
-            style: { stroke: 'red' },
+            style: { 
+              stroke: 'red',
+              strokeWidth: 4,
+             },
             markerEnd: {
               type: MarkerType.ArrowClosed,
-              width: 75,
+              width: 15,
               height: 50,
               color: "blue"
             },

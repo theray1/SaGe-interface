@@ -1,23 +1,24 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 
 const ProjectionNode = (props) => {
 
+	const [nodeData, setNodeData] = useState(props);
 
-    const cleanAttributeDisplay = () => {
-      return (
-        props.data.valuesList.map((value) => {
-          const str = JSON.stringify(value);
-          return (
-            <div key={str}>
-              {"- " + str.substring(2, str.length - 1)}<br/>
-            </div>
-          );
-        })
-      )
-    }
+  const cleanAttributeDisplay = () => {
+    return (
+      nodeData.data.valuesList.map((value) => {
+        const str = JSON.stringify(value);
+        return (
+          <div key={str}>
+            {"- " + str.substring(2, str.length - 1)}<br/>
+          </div>
+        );
+      })
+    )
+  }
 
     const content = <div className="QueryNode">
                         <div className="Handles">
@@ -26,12 +27,12 @@ const ProjectionNode = (props) => {
     </div>
     <div className="DisplayData">
                         Projection sur les attributs: <br/>{cleanAttributeDisplay()}
-                    </div>
-                    </div>
+                  </div>
+                  </div>
 
-    return (
-      <ContainerNode content={content} childProps={props}></ContainerNode>  
-    );
+  return (
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
+  );
 }
 
 export default ProjectionNode;

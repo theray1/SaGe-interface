@@ -1,13 +1,15 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 
 function JoinNode(props){
 
+  const [nodeData, setNodeData] = useState(props);
+
   const cleanAttributeDisplay = () => {
     return (
-      props.data.mucMap.map((value) => {
+      nodeData.data.mucMap.map((value) => {
         const str1 = JSON.stringify(value[0]);
         const str2 = JSON.stringify(value[1]);
         return (
@@ -33,7 +35,7 @@ function JoinNode(props){
 </div>
 
 return (
-    <ContainerNode content={content} childProps={props}></ContainerNode>  
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
   );
 }
 

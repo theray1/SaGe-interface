@@ -1,9 +1,11 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 
 function FilterNode(props){
+
+  const [nodeData, setNodeData] = useState(props);
 
     const content = <div className="QueryNode">
     <div className="Handles">
@@ -11,14 +13,14 @@ function FilterNode(props){
     <Handle type='target' position="bottom"/>
     </div>
     <div className="DisplayData">
-    Expression:<br/> {props.data.expression}<br/>
-    Consumed: {props.data.consumed}<br/>
-    Produced: {props.data.produced}<br/>
+    Expression:<br/> {nodeData.data.expression}<br/>
+    Consumed: {nodeData.data.consumed}<br/>
+    Produced: {nodeData.data.produced}<br/>
     </div>
 </div>
 
 return (
-    <ContainerNode content={content} childProps={props}></ContainerNode>  
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
   );
 }
 

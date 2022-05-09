@@ -65,7 +65,7 @@ function App(){
   const [isQueryEditable, setIsQueryEditable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
-  const [stopAutoRun, setStopAutoRun] = useState(false);
+
 
   const nodeWidth = 500;
   const nodeHeight = 150;
@@ -162,6 +162,31 @@ function App(){
     setEdges(newEdges);
 
   }
+
+
+  //LES NOEUDS SONT PAS BOUGEABLES PENDANT UN AUTO RUN 
+  /*const updateGraph = (graph) => {
+    var newNodes = [];
+
+    graph.forEach(element => {
+      if(element.position !== undefined){//The element has a position, thus it is a node
+
+        newNodes.push(element);
+      
+      }
+    })
+
+    newNodes.forEach((newNode) => {
+      nodes.forEach((oldNode) => {
+        if(oldNode.id === newNode.id){
+          oldNode.position = oldNode.position;
+        }
+      })
+    })
+
+    setNodes(newNodes);
+  }*/
+
 
   //Very optimizable
   const updateGraph = (graph) => {
@@ -312,12 +337,9 @@ function App(){
 
   function commitNextUntilQueryIsOver(){
     commitNext().then((data) => {
-      if(!stopAutoRun){
+      
         setIsAutoRunOn(data["hasNext"]);
-      } else {
-        setIsAutoRunOn(!isAutoRunOn);
-        setStopAutoRun(!stopAutoRun);
-      }
+      
     });
   }
 
@@ -369,7 +391,7 @@ function App(){
                 <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryOnMouseDown()} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button></th>
                 <th><button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button></th>
                 <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
-                <th><button id='stopAutoRun' onClick={() => {setStopAutoRun(true)}}>Stop Auto-Run</button></th>
+                <th><button id='stopAutoRun' onClick={() => {setIsAutoRunOn(false)}}>Stop Auto-Run</button></th>
                 <th><button id='debugButton' onClick={() => {console.log(queryInput)}}>Debug Button</button></th>
               </tr>
             </tbody>
@@ -387,12 +409,12 @@ function App(){
         </div>
         <div className="Metrics">
           <div className="MetricsContent">
-            export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
-            import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
-            cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
-            cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
-            coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
-            progression:<br/>
+            Export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
+            Import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
+            Cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
+            Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
+            Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
+            Progression:<br/>
             <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
           </div>
         </div>      

@@ -1,9 +1,11 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 
 function InsertNode(props){
+
+  const [nodeData, setNodeData] = useState(props);
 
     const content = <div className="QueryNode">
     <div className="Handles">
@@ -11,12 +13,12 @@ function InsertNode(props){
     <Handle type='target' position="bottom"/>
     </div>
     <div className="DisplayData">
-    nbInserted: {props.data.nbInserted}<br/>
+    nbInserted: {nodeData.data.nbInserted}<br/>
     </div>
 </div>
 
 return (
-    <ContainerNode content={content} childProps={props}></ContainerNode>  
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
   );
 }
 

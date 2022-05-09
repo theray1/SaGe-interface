@@ -1,8 +1,10 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 function UnionNode(props){
+
+  const [nodeData, setNodeData] = useState(props);
 
     const content = <div className="QueryNode">
     <div className="Handles">
@@ -13,7 +15,7 @@ function UnionNode(props){
 </div>
 
     return (
-      <ContainerNode content={content} childProps={props}></ContainerNode>  
+      <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
     );
 }
 

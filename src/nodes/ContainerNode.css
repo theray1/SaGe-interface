@@ -9,37 +9,37 @@
     font-size: 1rem;
     background-color: white;
     border-radius: 3%;
+    border-color: rgb(226, 170, 234);
 
     width: 300px;
     height: 130px;
-    border-color: rgb(226, 170, 234);
+    max-height: fit-content;
     
 
-    transition: border 0.5s, transform 0.5s, border-color 0.5s, width 0.5s, height 0.5s;
+    transition: border 0.5s, border-radius 0.5s, width 0.5s, max-height 0.5s;
 }
 
 .ContainerNodeFocused {
     border: 5px solid rebeccapurple;
-    height: auto;
-    display: block;
     width: 500px;
+
     height: auto;
-    transform: translateX(-100px);
+    min-height: 500px;
+    max-height: 500px;
+    
 }
 
 .DisplayData {
     opacity: 0;
-    overflow: hidden;
-    height: 0px;
-    background-color: white;
+    max-height: 0px;
+    background-color: rgb(255, 0, 0);
 
-    transition: opacity 0.5s, overflow 0.5s, height 10s;
+    transition: opacity 0.5s, max-height 0.5s;
 }
 
 .DisplayDataFocused {
     opacity: 1;
-    overflow: hidden;
-    height: max-content;
+    max-height: 500px;
 }
 
 .MainData {

@@ -1,9 +1,11 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
 
 
 function DeleteNode(props){
+
+  const [nodeData, setNodeData] = useState(props);
 
     const content = <div className="QueryNode">
       <div className="Handles">
@@ -11,12 +13,12 @@ function DeleteNode(props){
     <Handle type='target' position="bottom"/>
     </div>
     <div className="DataDisPlay">
-    nbInserted: <br/>{props.data.nbInserted}<br/>
+    nbInserted: <br/>{nodeData.data.nbInserted}<br/>
     </div>
 </div>
 
-return (
-    <ContainerNode content={content} childProps={props}></ContainerNode>  
+  return (
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
   );
 }
 
