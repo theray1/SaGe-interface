@@ -5,7 +5,7 @@ import ContainerNode from "./ContainerNode";
 
 function JoinNode(props){
 
-  const [nodeData, setNodeData] = useState(props);
+  const nodeData = props;
 
   const cleanAttributeDisplay = () => {
     return (

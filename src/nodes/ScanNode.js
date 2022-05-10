@@ -7,7 +7,7 @@ import ContainerNode from "./ContainerNode";
 
 function ScanNode(props){
 
-    const [nodeData, setNodeData] = useState(props);
+    const nodeData = props;
 
     //This formula can be found in SaGe engine's source code (Hey Wang ! :D)
     const card = Math.max(nodeData.data.patternCardinality, nodeData.data.produced);        
@@ -15,14 +15,14 @@ function ScanNode(props){
 
     const coverage = Math.max(0, 1-props.data.produced) * (step/card);
 
-
-    const content = <div className="QueryNode">
-    <div className="Handles">
-    <Handle type='source' position="top"/>
-    </div>
-    <div className="MainData">
-      <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage*100}/>
-    </div>
+    const content = 
+    <div className="QueryNode">
+      <div className="Handles">
+        <Handle type='source' position="top"/>
+      </div>
+      <div className="MainData">
+        <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage*100}/>
+      </div>
     <div className="DisplayData">
     
     CumulativeCardinality: <br/>{nodeData.data.cumulativeCardinality}<br/>

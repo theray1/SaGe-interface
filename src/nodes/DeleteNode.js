@@ -5,7 +5,7 @@ import ContainerNode from "./ContainerNode";
 
 function DeleteNode(props){
 
-  const [nodeData, setNodeData] = useState(props);
+  const nodeData = props;
 
     const content = <div className="QueryNode">
       <div className="Handles">

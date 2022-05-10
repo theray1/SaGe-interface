@@ -25,6 +25,7 @@ import DeleteNode from './nodes/DeleteNode';
 import SlideBar from './slidebars/SlideBar';
 import roundDownFiveDecimals from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
+import ContainerNode from './nodes/ContainerNode';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -54,6 +55,9 @@ function App(){
 
   let sparqlServer = "http://localhost:8000/sparql";
 
+  const [, updateState] = React.useState();
+  const forceUpdate = React.useCallback(() => updateState({}), []);
+
   var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -79,6 +83,24 @@ function App(){
   const [costMetric, setCostMetric] = useState("");
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
+
+  const [currentlyDraggedNode, setCurrentlyDraggedNode] = useState(null);
+
+  const onNodeDrag = (nodeEvent, node) => {
+    var mouseX = nodeEvent.clientX;
+    var mouseY = nodeEvent.clientY;
+
+    node.position = {x: mouseX, y: mouseY};
+    console.log(node.position);
+
+    setCurrentlyDraggedNode(node);
+
+    console.log(node);
+
+    console.log("x:", mouseX);
+    console.log("y: ", mouseY);
+    console.log('heya');
+  }
 
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
@@ -165,7 +187,7 @@ function App(){
 
 
   //LES NOEUDS SONT PAS BOUGEABLES PENDANT UN AUTO RUN 
-  /*const updateGraph = (graph) => {
+  const updateGraph = (graph) => {
     var newNodes = [];
 
     graph.forEach(element => {
@@ -176,20 +198,22 @@ function App(){
       }
     })
 
+    console.log(newNodes);
+
     newNodes.forEach((newNode) => {
       nodes.forEach((oldNode) => {
         if(oldNode.id === newNode.id){
-          oldNode.position = oldNode.position;
+          newNode.position = oldNode.position;
         }
       })
     })
 
     setNodes(newNodes);
-  }*/
+  }
 
 
   //Very optimizable
-  const updateGraph = (graph) => {
+  /*const updateGraph = (graph) => {
     var newNodes = [];
 
     graph.forEach(element => {
@@ -200,9 +224,12 @@ function App(){
       }
     })
 
+    
+
+    console.log(newNodes);
+
     newNodes.forEach((newNode) =>{
       var oldPosition = {x: 0, y: 0};
-
       nodes.forEach((oldNode) =>{
         if(oldNode.id === newNode.id){
           oldPosition = oldNode.position;
@@ -213,11 +240,11 @@ function App(){
     });
 
     setNodes(newNodes);
-  }
+    forceUpdate();
+  }*/
 
   //Starts the process of parsing the query and sending the query to the SaGe server 
   const commitQuery = () => {
-    console.log("Running : ", query);
     setIsQueryEditable(false);
 
     let fetchData = {
@@ -233,8 +260,6 @@ function App(){
     .then(res => res.json())
     .then(data => {
 
-      console.log("data: ", data);
-
       if(data["hasNext"]){
 
         let graphElements = protoplan_to_graph(data["next"]);
@@ -248,7 +273,6 @@ function App(){
       
       }
 
-      console.log("Response's next link", data["next"]);
 
       updateStats(data["stats"]);
       
@@ -276,12 +300,9 @@ function App(){
       }
     }
 
-    console.log("Next fetch instructions: ", fetchInstructions);
-
     let promise = fetch(sparqlServer, fetchInstructions)
     .then(res => res.json())
     .then(data => {
-      console.log("Response: ", data);
 
       if(data["hasNext"]){
 
@@ -355,10 +376,8 @@ function App(){
   }
 
   const handleCommitQueryOnMouseDown = () => {
-    console.log(queryInput)
     const queryWithoutUselessCharacters = queryInput.replace(/\r?\n|\r/g, "");
     setQuery(queryWithoutUselessCharacters);
-    console.log(queryWithoutUselessCharacters);
   }
 
   return(
@@ -392,7 +411,7 @@ function App(){
                 <th><button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button></th>
                 <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
                 <th><button id='stopAutoRun' onClick={() => {setIsAutoRunOn(false)}}>Stop Auto-Run</button></th>
-                <th><button id='debugButton' onClick={() => {console.log(queryInput)}}>Debug Button</button></th>
+                <th><button id='debugButton' onClick={() => {console.log(nodes)}}>Debug Button</button></th>
               </tr>
             </tbody>
           </table>
@@ -405,7 +424,7 @@ function App(){
 
       <div className="MainGraphWithMetrics">
         <div className="MainGraph">
-          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
+          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onNodeDrag={onNodeDrag} fitView><Controls/></ReactFlow>
         </div>
         <div className="Metrics">
           <div className="MetricsContent">

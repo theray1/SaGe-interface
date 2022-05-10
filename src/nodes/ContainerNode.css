@@ -1,7 +1,4 @@
-.ContainedNode {
-    text-align: left;
-    pointer-events: none;
-}
+
 
 .ContainerNode {
     border: 2px solid;
@@ -12,38 +9,31 @@
     border-color: rgb(226, 170, 234);
 
     width: 300px;
-    height: 130px;
-    max-height: fit-content;
+    min-height: 150px;
+    height: fit-content;
     
 
-    transition: border 0.5s, border-radius 0.5s, width 0.5s, max-height 0.5s;
 }
 
 .ContainerNodeFocused {
     border: 5px solid rebeccapurple;
-    width: 500px;
 
-    height: auto;
-    min-height: 500px;
-    max-height: 500px;
-    
+}
+
+.ContainedNode {
+    text-align: left;
+    pointer-events: none;
+
 }
 
 .DisplayData {
-    opacity: 0;
-    max-height: 0px;
-    background-color: rgb(255, 0, 0);
-
-    transition: opacity 0.5s, max-height 0.5s;
-}
-
-.DisplayDataFocused {
-    opacity: 1;
-    max-height: 500px;
+    overflow: hidden;
+    height: 0;
+    transition: height 0.5s;
 }
 
 .MainData {
-    margin: 0px;
+    margin: 3px;
 }
 
 .Label {

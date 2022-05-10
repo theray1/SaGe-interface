@@ -5,7 +5,7 @@ import ContainerNode from "./ContainerNode";
 
 const ProjectionNode = (props) => {
 
-	const [nodeData, setNodeData] = useState(props);
+	const nodeData = props;
 
   const cleanAttributeDisplay = () => {
     return (
