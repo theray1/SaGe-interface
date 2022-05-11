@@ -206,10 +206,19 @@ function App(){
     newNodes.forEach((newNode) => {
       nodes.forEach((oldNode) => {
         if(oldNode.id === newNode.id){
-          newNode.position = oldNode.position;
+          if(document.activeElement === document.getElementById(newNode.id)){
+            var newX = parseInt(document.getElementById(newNode.id).getAttribute("xposition"), 10);
+            var newY = parseInt(document.getElementById(newNode.id).getAttribute("yposition"), 10);
+            var newPosition = { x: newX, y: newY };
+            newNode.position = newPosition;
+          }else {
+            newNode.position = oldNode.position;
+          }
+          
         }
       })
     })
+
     
     
     setNodes(newNodes);

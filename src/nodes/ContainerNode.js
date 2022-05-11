@@ -74,7 +74,7 @@ const ContainerNode = (props) => {
     }
 
     return (
-        <div className="ContainerNode" id={props.childProps.id} onDoubleClick={(e) => {doubleClickHandler(e)}} tabIndex="0">
+        <div className="ContainerNode" id={props.childProps.id} xposition={props.childProps.xPos} yposition={props.childProps.yPos} onDoubleClick={(e) => {doubleClickHandler(e)}} tabIndex="0">
             <div className="Label">{props.childProps.data.label}</div>
             <div className="ContainedNode">{props.content}</div>
         </div>

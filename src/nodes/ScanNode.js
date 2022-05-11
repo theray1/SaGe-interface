@@ -6,9 +6,6 @@ import SlideBar from "../slidebars/SlideBar";
 import ContainerNode from "./ContainerNode";
 
 function ScanNode(props){
-
-  
-
     const nodeData = props;
 
     //This formula can be found in SaGe engine's source code (Hey Wang ! :D)
@@ -20,10 +17,6 @@ function ScanNode(props){
 
     //Functionning but partially inaccurate formula
     const coverage = 100 * props.data.produced / props.data.cardinality;
-
-    if(coverage > 1){
-      console.log(coverage);
-    }
 
     const content = 
     <div className="QueryNode">
