@@ -191,7 +191,6 @@ function App(){
   }
 
 
-  //LES NOEUDS SONT PAS BOUGEABLES PENDANT UN AUTO RUN 
   const updateGraph = (graph) => {
     var newNodes = [];
 
@@ -206,15 +205,22 @@ function App(){
     newNodes.forEach((newNode) => {
       nodes.forEach((oldNode) => {
         if(oldNode.id === newNode.id){
+          
           if(document.activeElement === document.getElementById(newNode.id)){
+          
             var newX = parseInt(document.getElementById(newNode.id).getAttribute("xposition"), 10);
             var newY = parseInt(document.getElementById(newNode.id).getAttribute("yposition"), 10);
+            
             var newPosition = { x: newX, y: newY };
+            
             newNode.position = newPosition;
-          }else {
-            newNode.position = oldNode.position;
-          }
           
+          }else {
+          
+            newNode.position = oldNode.position;
+          
+          }
+        
         }
       })
     })
@@ -394,6 +400,15 @@ function App(){
     setQuery(queryWithoutUselessCharacters);
   }
 
+  const handleLayoutMouseDown = () => {
+    
+
+  }
+
+  const handleLayoutClick = () => {
+    createGraph(nodes.concat(edges));
+  }
+
   return(
     <div className="App">
       <div className="Header">
@@ -426,6 +441,7 @@ function App(){
                 <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
                 <th><button id='stopAutoRun' onClick={() => {setIsAutoRunOn(false)}}>Stop Auto-Run</button></th>
                 <th><button id='debugButton' onClick={() => {console.log(nodes)}}>Debug Button</button></th>
+                <th><button id='layoutButton' onMouseDown={() => handleLayoutMouseDown()}onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
             </tbody>
           </table>
