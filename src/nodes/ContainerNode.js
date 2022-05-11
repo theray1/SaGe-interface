@@ -4,39 +4,30 @@ import './ContainerNode.css';
 
 const ContainerNode = (props) => {
 
-    //const [isSelected, setIsSelected] = useState(true);
+    const toggleNodeCollapse = (node) => {
+
+      const section = node.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
+        const isExpanded = section.getAttribute('data-expanded') === 'true';
+
+        if(!isExpanded) {
+          expandNode(section)
+          node.classList.add("ContainerNodeFocused");
+        } else {
+          collapseNode(section);
+          node.classList.remove("ContainerNodeFocused");
+        }
+
+    }
 
     const doubleClickHandler = (event) => {    
 
-        var section = event.target.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
-        var isExpanded = section.getAttribute('data-expanded') === 'true';
-
-        if(!isExpanded) {
-          expandSection(section)
-          event.target.classList.add("ContainerNodeFocused");
-        } else {
-          collapseSection(section);
-          event.target.classList.remove("ContainerNodeFocused");
-        }
-
-        /*const targetedNode = event.target;
-        const targetContainedNode = targetedNode.getElementsByClassName("ContainedNode")[0];
-        const targetQueryNode = targetContainedNode.getElementsByClassName("QueryNode")[0];
-        const targetDisplayData = targetQueryNode.getElementsByClassName("DisplayData")[0];
-        setIsSelected(!isSelected);
-
-        if(isSelected){
-            targetedNode.classList.add("ContainerNodeFocused");
-            targetDisplayData.classList.add("DisplayDataFocused");
-        } else {
-            targetedNode.classList.remove("ContainerNodeFocused");
-            targetDisplayData.classList.remove("DisplayDataFocused");
-        }*/
+      const node = event.target;
+      toggleNodeCollapse(node);
 
     }
 
     //Shameless copy pasta from https://css-tricks.com/using-css-transitions-auto-dimensions/
-    function collapseSection(element) {
+    function collapseNode(element) {
         // get the height of the element's inner content, regardless of its actual size
         var sectionHeight = element.scrollHeight;
         
@@ -62,7 +53,7 @@ const ContainerNode = (props) => {
         element.setAttribute('data-expanded', 'false');
       }
       
-    function expandSection(element) {
+    function expandNode(element) {
         // get the height of the element's inner content, regardless of its actual size
         var sectionHeight = element.scrollHeight;
         

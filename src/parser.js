@@ -20,10 +20,7 @@ const node_factory = (obj, key, id) => {
     type: 'default',
     position: {x: 0, y: 0},
     data: {},
-    deducedData: {}
   };
-
-  //console.log(obj);
 
   if(key === 'projSource' || key === 'projLeft' || key === 'projRight'){//Projection
     node.type = 'projectionNode';
@@ -142,12 +139,11 @@ const plan_request_to_graph = (obj) => {
 }
 
 export function protoplan_to_graph(plan) {
-  //console.log("plan :", plan);
   var decodeplan = Buffer.from(plan, 'base64');
-  //console.log("decodeplan :", decodeplan);
+
   var jsonplan = proto.RootTree.deserializeBinary(new Uint8Array(decodeplan)).toObject();
   
   const graph = plan_request_to_graph(jsonplan);
-  //console.log("Generated Graph", graph);
+
   return graph;
 }

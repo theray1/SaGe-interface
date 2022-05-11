@@ -81,32 +81,6 @@ function App(){
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
 
-  //var [currentlyDraggedNode, setCurrentlyDraggedNode] = useState(null);
-
-  /*const onNodeDragStart = (nodeEvent, node) => {
-    currentlyDraggedNode = node;
-  }
-
-  const onNodeDragStop = (nodeEvent, node) => {
-    currentlyDraggedNode = null;
-  }
-
-  const onNodeDrag = (nodeEvent, node) => {
-    var mouseX = nodeEvent.clientX;
-    var mouseY = nodeEvent.clientY;
-
-    node.position = {x: mouseX, y: mouseY};
-    console.log(node.position);
-
-    setCurrentlyDraggedNode(node);
-
-    console.log(node);
-
-    console.log("x:", mouseX);
-    console.log("y: ", mouseY);
-    console.log('heya');
-  }*/
-
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
     setImportMetric(queryStats["import"]);
@@ -230,38 +204,6 @@ function App(){
     setNodes(newNodes);
    
   }
-
-
-  //Very optimizable
-  /*const updateGraph = (graph) => {
-    var newNodes = [];
-
-    graph.forEach(element => {
-      if(element.position !== undefined){
-
-        newNodes.push(element);
-      
-      }
-    })
-
-    
-
-    console.log(newNodes);
-
-    newNodes.forEach((newNode) =>{
-      var oldPosition = {x: 0, y: 0};
-      nodes.forEach((oldNode) =>{
-        if(oldNode.id === newNode.id){
-          oldPosition = oldNode.position;
-        }
-      })
-
-      newNode.position = oldPosition;
-    });
-
-    setNodes(newNodes);
-    forceUpdate();
-  }*/
 
   //Starts the process of parsing the query and sending the query to the SaGe server 
   const commitQuery = () => {
@@ -400,11 +342,6 @@ function App(){
     setQuery(queryWithoutUselessCharacters);
   }
 
-  const handleLayoutMouseDown = () => {
-    
-
-  }
-
   const handleLayoutClick = () => {
     createGraph(nodes.concat(edges));
   }
@@ -441,7 +378,7 @@ function App(){
                 <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
                 <th><button id='stopAutoRun' onClick={() => {setIsAutoRunOn(false)}}>Stop Auto-Run</button></th>
                 <th><button id='debugButton' onClick={() => {console.log(nodes)}}>Debug Button</button></th>
-                <th><button id='layoutButton' onMouseDown={() => handleLayoutMouseDown()}onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
+                <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
             </tbody>
           </table>
