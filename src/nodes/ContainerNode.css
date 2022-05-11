@@ -8,17 +8,22 @@
     border-radius: 3%;
     border-color: rgb(226, 170, 234);
 
-    width: 300px;
+    width: 350px;
     min-height: 150px;
     height: fit-content;
     
-
+    transition: font-size 0.4s, width 0.5s;
 }
 
 .ContainerNodeFocused {
     border: 5px solid rebeccapurple;
-
+    width: 525px;
 }
+
+.ContainerNodeFocused:not(.NodeProgressSlideBar) {
+    font-size: 1.5rem;
+}
+
 
 .ContainedNode {
     text-align: left;
@@ -29,6 +34,7 @@
 .DisplayData {
     overflow: hidden;
     height: 0;
+    padding-top: 5%;
     transition: height 0.5s;
 }
 
@@ -40,4 +46,8 @@
     pointer-events: none;
     font-size: 180%;
     padding-bottom: 15%;
+}
+
+.NodeProgressSlideBar {
+    margin-bottom: 1.5%;
 }

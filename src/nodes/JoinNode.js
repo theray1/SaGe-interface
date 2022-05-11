@@ -23,15 +23,15 @@ function JoinNode(props){
 
     const content = <div className="QueryNode">
     <div className="Handles">
-    <Handle type='source' position="top"/>
-    <Handle type='target' position="bottom"/>
-    </div>
-    <div className="DisplayData">
-    mucMap: <br/>{cleanAttributeDisplay()}
+      <Handle type='source' position="top"/>
+      <Handle type='target' position="bottom"/>
     </div>
     <div className="MainData">
-      
+      mucMap: <br/>{cleanAttributeDisplay()}
     </div>
+    <div className="DisplayData">
+    </div>
+    
 </div>
 
 return (

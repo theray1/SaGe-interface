@@ -9,6 +9,7 @@ import ReactFlow, {
   ConnectionLineType,
   useNodesState,
   useEdgesState,
+  MiniMap,
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 import {
@@ -22,10 +23,8 @@ import ScanNode from './nodes/ScanNode';
 import ValuesNode from './nodes/ValuesNode';
 import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
-import SlideBar from './slidebars/SlideBar';
 import roundDownFiveDecimals from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
-import ContainerNode from './nodes/ContainerNode';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -55,24 +54,23 @@ function App(){
 
   let sparqlServer = "http://localhost:8000/sparql";
 
-  var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
   const [query, setQuery] = useState(null);
-
-  const [nextLink, setNextLink] = useState(null);
-  const [queryInput, setQueryInput] = useState(JSON.stringify(sparqlRequest));
+  const [queryInput, setQueryInput] = useState(sparqlRequest["query"]);
 
   const [isQueryEditable, setIsQueryEditable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
 
-
   const nodeWidth = 500;
-  const nodeHeight = 150;
-
+  const nodeHeight = 200;
+  
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  const [nextLink, setNextLink] = useState(null);
+
+  var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const [exportMetric, setExportMetric] = useState("");
   const [importMetric, setImportMetric] = useState("");
@@ -231,7 +229,7 @@ function App(){
 
       } else {
 
-        alert("All the elements were found in one quantum! If you would like to have the plan, and a more detailed execution plan, please reduce the max_results attribute or the quota attribute in your config file");
+        alert("All the elements were found in one quantum! If you would like to have the data, and a more detailed execution plan, please reduce the max_results attribute or the quota attribute in your config file");
       
       }
 
@@ -296,6 +294,7 @@ function App(){
     return promise;
   }
 
+  //
   function autoRunQuery(){
     commitQuery().then(
       (response) => {
@@ -318,12 +317,55 @@ function App(){
     }
   }, [nextLink]);
 
+  //Sends a request for one quantum and changes the value of isAutoRunOn according to the response
   function commitNextUntilQueryIsOver(){
     commitNext().then((data) => {
       
         setIsAutoRunOn(data["hasNext"]);
       
     });
+  }
+
+
+  //Text input handling
+  const handleQueryInputChange = (event) => {
+    if(isQueryEditable){
+      setQueryInput(event.target.value);
+    }
+  }
+
+
+  const createRequest = (rawQuery) => {
+    const queryWithoutUselessCharacters = rawQuery.replace(/\r?\n|\r/g, "");
+    sparqlRequest["query"] = queryWithoutUselessCharacters;
+
+    return JSON.stringify(sparqlRequest);
+  }
+
+
+  //Button input handling
+  const handleCommitQueryMouseDown = () => {
+    setQuery(createRequest(queryInput));
+  }
+
+  const handleCommitQueryClick = () => {
+    if(isQueryEditable){
+      commitQuery();
+    }
+  }
+
+  const handleResumeMouseDown = () => {
+    setIsAutoRunOn(false);
+  }
+
+  const handleResumeClick = () => {
+    if(isQueryResumeable){
+      commitNext();
+    }
+  }
+
+  const handleAutoRunMouseDown = () => {
+    setQuery(createRequest(queryInput));
   }
 
   const handleAutoRunClick = () => {
@@ -337,9 +379,8 @@ function App(){
     }
   }
 
-  const handleCommitQueryOnMouseDown = () => {
-    const queryWithoutUselessCharacters = queryInput.replace(/\r?\n|\r/g, "");
-    setQuery(queryWithoutUselessCharacters);
+  const handleStopAutoRunClick= () => {
+    setIsAutoRunOn(false);
   }
 
   const handleLayoutClick = () => {
@@ -365,7 +406,7 @@ function App(){
         </div>
 
         <div className="Inputs">
-          <textarea rows={10} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => {if(isQueryEditable)setQueryInput(e.target.value)}}></textarea>
+          <textarea rows={10} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => handleQueryInputChange(e)}></textarea>
 
           <br/>
           <br/>
@@ -373,10 +414,10 @@ function App(){
           <table className="Buttons">
             <tbody>
               <tr className="ButtonsTable">
-                <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryOnMouseDown()} onClick={() => {if(isQueryEditable){commitQuery()}}}>Commit Query</button></th>
-                <th><button id="resumeQueryButton" onClick={() => {if(isQueryResumeable)commitNext()}}>Resume Query</button></th>
-                <th><button id="autoRunQueryButton" onMouseDown={() => {setQuery(queryInput)}} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
-                <th><button id='stopAutoRun' onClick={() => {setIsAutoRunOn(false)}}>Stop Auto-Run</button></th>
+                <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryMouseDown()} onClick={() => handleCommitQueryClick()}>Commit Query</button></th>
+                <th><button id="resumeQueryButton" onMouseDown={() => handleResumeMouseDown()} onClick={() => handleResumeClick()}>Next Quantum</button></th>
+                <th><button id="autoRunQueryButton" onMouseDown={() => handleAutoRunMouseDown()} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
+                <th><button id='stopAutoRun' onClick={() => handleStopAutoRunClick()}>Stop Auto-Run</button></th>
                 <th><button id='debugButton' onClick={() => {console.log(nodes)}}>Debug Button</button></th>
                 <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
@@ -391,7 +432,16 @@ function App(){
 
       <div className="MainGraphWithMetrics">
         <div className="MainGraph">
-          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
+          <ReactFlow
+            nodes={nodes} 
+            edges={edges} 
+            nodeTypes={nodeTypes} 
+            onNodesChange={onNodesChange} 
+            fitView
+            minZoom={0.1} 
+            maxZoom={5}>
+              <Controls/>
+            </ReactFlow>
         </div>
         <div className="Metrics">
           <div className="MetricsContent">

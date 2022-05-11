@@ -25,13 +25,13 @@ function ScanNode(props){
       </div>
       <div className="MainData">
         <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage}/>
+        Triple pattern : <br/>
+        subject: {nodeData.data.pattern.subject} <br/> predicate: {nodeData.data.pattern.predicate} <br/> object: {nodeData.data.pattern.object}<br/>
+
       </div>
     <div className="DisplayData">
     
     CumulativeCardinality: <br/>{nodeData.data.cumulativeCardinality}<br/>
-
-    Object - Predicate - Subject: <br/>
-    {nodeData.data.pattern.object} - {nodeData.data.pattern.predicate} - {nodeData.data.pattern.subject}<br/>
 
     Cardinality: <br/>{nodeData.data.cardinality}<br/>
     PatternCardinality: <br/>{nodeData.data.patternCardinality}<br/>

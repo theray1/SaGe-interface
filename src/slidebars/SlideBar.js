@@ -35,9 +35,9 @@ const ProgressBar = (props) => {
   };
 
   return (
-    <div className="Container" style={containerStyles}>
-      <div className="Filler" style={fillerStyles}>
-        <span className="Progress" style={labelStyles}>{Math.floor(progressValue)}%</span>
+    <div className="ProgressBarContainer" style={containerStyles}>
+      <div className="ProgressBarFiller" style={fillerStyles}>
+        <span className="ProgressBarSpan" style={labelStyles}>{Math.floor(progressValue)}%</span>
       </div>
     </div>
   );
