@@ -55,9 +55,6 @@ function App(){
 
   let sparqlServer = "http://localhost:8000/sparql";
 
-  const [, updateState] = React.useState();
-  const forceUpdate = React.useCallback(() => updateState({}), []);
-
   var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -84,7 +81,15 @@ function App(){
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
 
-  const [currentlyDraggedNode, setCurrentlyDraggedNode] = useState(null);
+  //var [currentlyDraggedNode, setCurrentlyDraggedNode] = useState(null);
+
+  /*const onNodeDragStart = (nodeEvent, node) => {
+    currentlyDraggedNode = node;
+  }
+
+  const onNodeDragStop = (nodeEvent, node) => {
+    currentlyDraggedNode = null;
+  }
 
   const onNodeDrag = (nodeEvent, node) => {
     var mouseX = nodeEvent.clientX;
@@ -100,7 +105,7 @@ function App(){
     console.log("x:", mouseX);
     console.log("y: ", mouseY);
     console.log('heya');
-  }
+  }*/
 
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
@@ -194,11 +199,9 @@ function App(){
       if(element.position !== undefined){//The element has a position, thus it is a node
 
         newNodes.push(element);
-      
+        
       }
     })
-
-    console.log(newNodes);
 
     newNodes.forEach((newNode) => {
       nodes.forEach((oldNode) => {
@@ -207,8 +210,10 @@ function App(){
         }
       })
     })
-
+    
+    
     setNodes(newNodes);
+   
   }
 
 
@@ -424,7 +429,7 @@ function App(){
 
       <div className="MainGraphWithMetrics">
         <div className="MainGraph">
-          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onNodeDrag={onNodeDrag} fitView><Controls/></ReactFlow>
+          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} fitView><Controls/></ReactFlow>
         </div>
         <div className="Metrics">
           <div className="MetricsContent">

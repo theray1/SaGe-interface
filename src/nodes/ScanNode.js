@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Handle } from "react-flow-renderer";
 import NodeProgressSlideBar from "../slidebars/NodeProgressSlideBar";
 import QueryProgressSlideBar from "../slidebars/QueryProgressSlideBar";
@@ -7,13 +7,23 @@ import ContainerNode from "./ContainerNode";
 
 function ScanNode(props){
 
+  
+
     const nodeData = props;
 
     //This formula can be found in SaGe engine's source code (Hey Wang ! :D)
-    const card = Math.max(nodeData.data.patternCardinality, nodeData.data.produced);        
-    const step = nodeData.data.patternCardinality / nodeData.data.cardinality;
+    //Update : it doesn't work 
 
-    const coverage = Math.max(0, 1-props.data.produced) * (step/card);
+    //const card = Math.max(nodeData.data.patternCardinality, nodeData.data.produced);        
+    //const step = nodeData.data.patternCardinality / nodeData.data.cardinality;
+    //const coverage = 100 * Math.max(0, 1-props.data.produced) * (step/card);
+
+    //Functionning but partially inaccurate formula
+    const coverage = 100 * props.data.produced / props.data.cardinality;
+
+    if(coverage > 1){
+      console.log(coverage);
+    }
 
     const content = 
     <div className="QueryNode">
@@ -21,7 +31,7 @@ function ScanNode(props){
         <Handle type='source' position="top"/>
       </div>
       <div className="MainData">
-        <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage*100}/>
+        <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage}/>
       </div>
     <div className="DisplayData">
     

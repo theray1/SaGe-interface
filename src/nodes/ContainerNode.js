@@ -6,9 +6,7 @@ const ContainerNode = (props) => {
 
     //const [isSelected, setIsSelected] = useState(true);
 
-    const doubleClickHandler = (event) => {
-
-      
+    const doubleClickHandler = (event) => {    
 
         var section = event.target.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
         var isExpanded = section.getAttribute('data-expanded') === 'true';

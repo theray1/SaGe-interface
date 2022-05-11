@@ -105,10 +105,6 @@ const plan_request_to_graph = (obj) => {
 
   while (queue.length > 0){
     var [o, parentId] = queue.shift();
-
-
-    //console.log("o: ", o);
-    //console.log("parentId: ", parentId);
     
     
     for (var key in o){
@@ -118,7 +114,6 @@ const plan_request_to_graph = (obj) => {
         nodes.push(node_factory(o, key, id));
 
         queue.push([o[key], id]);
-        //console.log("queue: ", queue);
 
         if(parentId !== null){
           edges.push({
@@ -151,7 +146,7 @@ export function protoplan_to_graph(plan) {
   var decodeplan = Buffer.from(plan, 'base64');
   //console.log("decodeplan :", decodeplan);
   var jsonplan = proto.RootTree.deserializeBinary(new Uint8Array(decodeplan)).toObject();
-  console.log("jsonplan :", jsonplan);
+  
   const graph = plan_request_to_graph(jsonplan);
   //console.log("Generated Graph", graph);
   return graph;
