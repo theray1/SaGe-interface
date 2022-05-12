@@ -46,13 +46,10 @@ textarea {
   align-items: center;
 }
 
-.QueryInput {
-  margin-top: 1%;
+.YasqeWrapper {
+  height: 80%;
   width: 50%;
-}
-
-.YasqeEditor {
-  max-height: 100px;
+  position: relative;
 }
 
 .Buttons {

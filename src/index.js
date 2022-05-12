@@ -26,7 +26,7 @@ import DeleteNode from './nodes/DeleteNode';
 import roundDownFiveDecimals from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
 import YASQE from 'yasgui-yasqe';
-import YasqeEditor from './YasqeEditor';
+import "yasgui-yasqe/dist/yasqe.min.css";
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -55,10 +55,9 @@ function App(){
 
   let sparqlServer = "http://localhost:8000/sparql";
 
-  const [yasqe, setYasque] = useState();
+  var [yasqe, setYasqe] = useState();
 
   const [query, setQuery] = useState(null);
-  const [queryInput, setQueryInput] = useState(sparqlRequest["query"]);
 
   const [isQueryEditable, setIsQueryEditable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
@@ -81,8 +80,15 @@ function App(){
   const [costMetric, setCostMetric] = useState("");
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
-
-  
+    
+  //componentDidMount equivalent. It is used to create the yasqe editor once, when the page is loaded
+  useEffect(() => {
+      if(true){
+          yasqe = YASQE(document.getElementById("YasqeEditor"));
+          yasqe.setValue(sparqlRequest["query"]);
+          yasqe.setSize(0.1 * document.getElementsByClassName("Inputs")[0].height, 0.5 * document.getElementsByClassName("Inputs")[0].width);
+      }
+  }, []);
 
   //nextLink watcher for autorun
   useEffect(() => {
@@ -332,15 +338,6 @@ function App(){
     });
   }
 
-
-  //Text input handling
-  const handleQueryInputChange = (event) => {
-    if(isQueryEditable){
-      setQueryInput(event.target.value);
-    }
-  }
-
-
   const createRequest = (rawQuery) => {
     const queryWithoutUselessCharacters = rawQuery.replace(/\r?\n|\r/g, "");
     sparqlRequest["query"] = queryWithoutUselessCharacters;
@@ -348,10 +345,14 @@ function App(){
     return JSON.stringify(sparqlRequest);
   }
 
+  const getQueryInput = () => {
+    console.log(yasqe.getValue());
+    return yasqe.getValue();
+  }
 
   //Button input handling
   const handleCommitQueryMouseDown = () => {
-    setQuery(createRequest(queryInput));
+    setQuery(createRequest(getQueryInput()));
   }
 
   const handleCommitQueryClick = () => {
@@ -371,7 +372,7 @@ function App(){
   }
 
   const handleAutoRunMouseDown = () => {
-    setQuery(createRequest(queryInput));
+    setQuery(createRequest(getQueryInput()));
   }
 
   const handleAutoRunClick = () => {
@@ -414,8 +415,11 @@ function App(){
         </div>
 
         <div className="Inputs">
-          <textarea rows={10} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => handleQueryInputChange(e)}></textarea>
-          <YasqeEditor yasqe={yasqe} initialValue={queryInput} />
+          <div className="YasqeWrapper">
+            <div id="YasqeEditor">
+            </div>
+          </div>
+         
           <br/>
 
           <table className="Buttons">
