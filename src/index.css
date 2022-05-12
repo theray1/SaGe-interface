@@ -2,7 +2,6 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   font-family: sans-serif;
   padding: 0px 0px 0px 0px;
 }
@@ -30,16 +29,18 @@ textarea {
   display: flex;
   resize: vertical;
   overflow: hidden;
+  background-color: rgb(226, 196, 234);
 }
 
 .CreditsAndUsefulLinks {
+  text-align: center;
   width: 25%;
   background-color: rgb(226, 170, 234);
 }
 
 .Inputs {
   width: 75%;
-  background-color: rgb(226, 196, 234);
+  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,6 +49,10 @@ textarea {
 .QueryInput {
   margin-top: 1%;
   width: 50%;
+}
+
+.YasqeEditor {
+  max-height: 100px;
 }
 
 .Buttons {

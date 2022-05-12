@@ -25,6 +25,8 @@ import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
 import roundDownFiveDecimals from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
+import YASQE from 'yasgui-yasqe';
+import YasqeEditor from './YasqeEditor';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -37,7 +39,6 @@ const nodeTypes = { projectionNode: ProjectionNode,
 
 function App(){
 
-
   //bsbm10
   //"query": "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
   //"query": "PREFIX p1: <http://www.w3.org/2000/01/rdf-schema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/2001/XMLSchema#> SELECT ?label WHERE { ?s p2:date '2000-07-15'^^p3:date; p1:label ?label . FILTER regex(?label, 't', 'i') }",
@@ -48,11 +49,13 @@ function App(){
 
   //Query management
   let sparqlRequest = {
-    query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> PREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/> SELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }",
+    query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nPREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/>\nSELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }",
     defaultGraph: "http://example.org/bsbm"
   };
 
   let sparqlServer = "http://localhost:8000/sparql";
+
+  const [yasqe, setYasque] = useState();
 
   const [query, setQuery] = useState(null);
   const [queryInput, setQueryInput] = useState(sparqlRequest["query"]);
@@ -78,6 +81,15 @@ function App(){
   const [costMetric, setCostMetric] = useState("");
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
+
+  
+
+  //nextLink watcher for autorun
+  useEffect(() => {
+    if(isAutoRunOn && nextLink !== null){
+      commitNextUntilQueryIsOver();
+    }
+  }, [nextLink]);
 
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
@@ -310,12 +322,6 @@ function App(){
     )
   }
 
-  //nextLink watcher for autorun
-  useEffect(() => {
-    if(isAutoRunOn && nextLink !== null){
-      commitNextUntilQueryIsOver();
-    }
-  }, [nextLink]);
 
   //Sends a request for one quantum and changes the value of isAutoRunOn according to the response
   function commitNextUntilQueryIsOver(){
@@ -387,8 +393,10 @@ function App(){
     createGraph(nodes.concat(edges));
   }
 
+
   return(
     <div className="App">
+      
       <div className="Header">
         <div className="CreditsAndUsefulLinks">
           <ul>
@@ -407,8 +415,7 @@ function App(){
 
         <div className="Inputs">
           <textarea rows={10} className="QueryInput" placeholder='Query' type="text" value={queryInput} onChange={(e) => handleQueryInputChange(e)}></textarea>
-
-          <br/>
+          <YasqeEditor yasqe={yasqe} initialValue={queryInput} />
           <br/>
 
           <table className="Buttons">
@@ -418,7 +425,7 @@ function App(){
                 <th><button id="resumeQueryButton" onMouseDown={() => handleResumeMouseDown()} onClick={() => handleResumeClick()}>Next Quantum</button></th>
                 <th><button id="autoRunQueryButton" onMouseDown={() => handleAutoRunMouseDown()} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
                 <th><button id='stopAutoRun' onClick={() => handleStopAutoRunClick()}>Stop Auto-Run</button></th>
-                <th><button id='debugButton' onClick={() => {console.log(nodes)}}>Debug Button</button></th>
+                <th><button id='debugButton' onClick={() => {console.log(yasqe)}}>Debug Button</button></th>
                 <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
             </tbody>
