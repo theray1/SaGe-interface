@@ -1,33 +1,27 @@
 import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
-
+import { getTableFrom2DArray } from "../util";
 
 function JoinNode(props){
+
+  const focus = () => {};
+  const unfocus = () => {};
 
   const nodeData = props;
 
   const cleanAttributeDisplay = () => {
-    return (
-      nodeData.data.mucMap.map((value) => {
-        const str1 = JSON.stringify(value[0]);
-        const str2 = JSON.stringify(value[1]);
-        return (
-          <div key={str1}>
-            {"- " + str1.substring(2, str1.length - 1) + " : " + str2.substring(2, str2.length - 1)}<br/>
-          </div>
-        );
-      })
-    )
+    return getTableFrom2DArray(nodeData.data.mucMap, "joinNodeMucMap");
   } 
 
     const content = <div className="QueryNode">
+      <div className="Label">{props.data.label}</div>
     <div className="Handles">
       <Handle type='source' position="top"/>
       <Handle type='target' position="bottom"/>
     </div>
     <div className="MainData">
-      mucMap: <br/>{cleanAttributeDisplay()}
+      {cleanAttributeDisplay()}
     </div>
     <div className="DisplayData">
     </div>

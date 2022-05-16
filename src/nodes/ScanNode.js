@@ -4,10 +4,14 @@ import NodeProgressSlideBar from "../slidebars/NodeProgressSlideBar";
 import QueryProgressSlideBar from "../slidebars/QueryProgressSlideBar";
 import SlideBar from "../slidebars/SlideBar";
 import ContainerNode from "./ContainerNode";
+import { getTableFrom2DArray } from "../util";
 
 function ScanNode(props){
     const nodeData = props;
 
+
+    const focus = () => {};
+    const unfocus = () => {};
     //This formula can be found in SaGe engine's source code (Hey Wang ! :D)
     //Update : it doesn't work 
 
@@ -24,16 +28,20 @@ function ScanNode(props){
         <Handle type='source' position="top"/>
       </div>
       <div className="MainData">
-        <NodeProgressSlideBar backgroundColor={"black"} progressBarColor={"#80036d"} progressValue={coverage}/>
-        Triple pattern : <br/>
-        subject: {nodeData.data.pattern.subject} <br/> predicate: {nodeData.data.pattern.predicate} <br/> object: {nodeData.data.pattern.object}<br/>
-
+        
+        {getTableFrom2DArray([
+          ["SUBJECT",nodeData.data.pattern.subject],
+          ["PREDICATE", nodeData.data.pattern.predicate],
+          ["OBJECT", nodeData.data.pattern.object]
+        ])}
+        <br/>
+        Cardinality: {nodeData.data.cardinality}<br/>
+        <NodeProgressSlideBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
       </div>
     <div className="DisplayData">
     
     CumulativeCardinality: <br/>{nodeData.data.cumulativeCardinality}<br/>
 
-    Cardinality: <br/>{nodeData.data.cardinality}<br/>
     PatternCardinality: <br/>{nodeData.data.patternCardinality}<br/>
     PatternProduced: <br/>{nodeData.data.patternProduced}<br/>
     Produced: <br/>{nodeData.data.produced}<br/>

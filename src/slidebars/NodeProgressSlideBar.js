@@ -4,7 +4,7 @@ function NodeProgressSlideBar(props){
 
   const backgroundColor = props.backgroundColor;
   const progressBarColor = props.progressBarColor;
-  const height = 28;
+  const height = "100%";
   const width = "100%";
   const fontSize = "170%";
   const fontColor = "white";

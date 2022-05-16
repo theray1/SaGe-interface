@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
-
+import { getTableFromArray } from "../util";
 
 const ProjectionNode = (props) => {
 
 	const nodeData = props;
+
+  const focus = () => {};
+  const unfocus = () => {};
 
   const cleanAttributeDisplay = () => {
     return (
@@ -21,6 +24,7 @@ const ProjectionNode = (props) => {
   }
 
     const content = <div className="QueryNode">
+      <div className="Label">{props.data.label}</div>
                         <div className="Handles">
     <Handle type='source' position="top"/>
     <Handle type='target' position="bottom"/>

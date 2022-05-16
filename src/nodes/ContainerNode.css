@@ -7,28 +7,40 @@
     background-color: white;
     border-radius: 3%;
     border-color: rgb(226, 170, 234);
+    overflow: scroll;
 
     width: 350px;
     min-height: 150px;
+    max-height: 300px;
     height: fit-content;
     
+    /*transform: translateX(20%);*/
+
     transition: font-size 0.4s, width 0.5s;
 }
 
 .ContainerNodeFocused {
     border: 5px solid rebeccapurple;
     width: 525px;
+    
 }
 
-.ContainerNodeFocused:not(.NodeProgressSlideBar) {
-    font-size: 1.5rem;
+.ContainerNodeFocused .Label{
+    font-size: 250%;
 }
 
+.ContainerNodeFocused .SlideBar{
+    height: 50px;
+}
+
+.ContainerNodeFocused .NodeProgressSlideBar {
+    font-size: 170%;
+}
 
 .ContainedNode {
     text-align: left;
     pointer-events: none;
-
+    height: 100%;
 }
 
 .DisplayData {
@@ -36,18 +48,25 @@
     height: 0;
     padding-top: 5%;
     transition: height 0.5s;
+    margin: 3px;
 }
 
-.MainData {
-    margin: 3px;
+.QueryNode {
+    height: 100%;
 }
 
 .Label {
     pointer-events: none;
-    font-size: 180%;
-    padding-bottom: 15%;
+    font-size: 200%;
+    text-align: center;
 }
 
-.NodeProgressSlideBar {
+.NodeProgressSlideBar .SlideBar {
     margin-bottom: 1.5%;
+
+    transition: height 0.5s;
+}
+
+th {
+    vertical-align: top;
 }

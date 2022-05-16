@@ -6,16 +6,21 @@ const ContainerNode = (props) => {
 
     const toggleNodeCollapse = (node) => {
 
-      const section = node.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
-        const isExpanded = section.getAttribute('data-expanded') === 'true';
+      const test1 = node.getElementsByClassName("ContainedNode")[0];
 
-        if(!isExpanded) {
-          expandNode(section)
-          node.classList.add("ContainerNodeFocused");
-        } else {
-          collapseNode(section);
-          node.classList.remove("ContainerNodeFocused");
-        }
+      const test2 = test1.getElementsByClassName("QueryNode")[0];
+
+      const section = node.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
+
+      const isExpanded = section.getAttribute('data-expanded') === 'true';
+
+      if(!isExpanded) {
+        expandNode(section)
+        node.classList.add("ContainerNodeFocused");
+      } else {
+        collapseNode(section);
+        node.classList.remove("ContainerNodeFocused");
+      }
 
     }
 
@@ -66,7 +71,6 @@ const ContainerNode = (props) => {
 
     return (
         <div className="ContainerNode" id={props.childProps.id} xposition={props.childProps.xPos} yposition={props.childProps.yPos} onDoubleClick={(e) => {doubleClickHandler(e)}} tabIndex="0">
-            <div className="Label">{props.childProps.data.label}</div>
             <div className="ContainedNode">{props.content}</div>
         </div>
     );

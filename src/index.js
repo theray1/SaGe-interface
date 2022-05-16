@@ -23,10 +23,10 @@ import ScanNode from './nodes/ScanNode';
 import ValuesNode from './nodes/ValuesNode';
 import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
-import roundDownFiveDecimals from './util';
+import { roundDownFiveDecimals } from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
 import YASQE from 'yasgui-yasqe';
-import "yasgui-yasqe/dist/yasqe.min.css";
+import "./yasqe.css";
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -55,7 +55,7 @@ function App(){
 
   let sparqlServer = "http://localhost:8000/sparql";
 
-  var [yasqe, setYasqe] = useState();
+  const [yasqe, setYasqe] = useState();
 
   const [query, setQuery] = useState(null);
 
@@ -63,8 +63,8 @@ function App(){
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
 
-  const nodeWidth = 500;
-  const nodeHeight = 200;
+  const nodeWidth = 600;
+  const nodeHeight = 250;
   
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -83,12 +83,22 @@ function App(){
     
   //componentDidMount equivalent. It is used to create the yasqe editor once, when the page is loaded
   useEffect(() => {
-      if(true){
-          yasqe = YASQE(document.getElementById("YasqeEditor"));
-          yasqe.setValue(sparqlRequest["query"]);
-          yasqe.setSize(0.1 * document.getElementsByClassName("Inputs")[0].height, 0.5 * document.getElementsByClassName("Inputs")[0].width);
-      }
+      const newYasqe = YASQE(document.getElementById("YasqeEditor"));
+      newYasqe.setValue(sparqlRequest["query"]);
+      setYasqe(newYasqe);
   }, []);
+
+  useEffect(() => {
+    
+  }, [yasqe])
+
+  useEffect(() => {
+    if(yasqe === undefined){
+      console.log("yasqe is undefined");
+    } else {
+      console.log("yasqe is defined");
+    }
+  })
 
   //nextLink watcher for autorun
   useEffect(() => {
@@ -347,6 +357,7 @@ function App(){
 
   const getQueryInput = () => {
     console.log(yasqe.getValue());
+    console.log(yasqe.getValue());
     return yasqe.getValue();
   }
 
@@ -372,11 +383,13 @@ function App(){
   }
 
   const handleAutoRunMouseDown = () => {
-    setQuery(createRequest(getQueryInput()));
+    if(nextLink === null){
+      setQuery(createRequest(getQueryInput()));
+    }
   }
 
   const handleAutoRunClick = () => {
-    if(nextLink == null){
+    if(nextLink === null){
       if(isQueryEditable){
         autoRunQuery();
       }
@@ -394,6 +407,9 @@ function App(){
     createGraph(nodes.concat(edges));
   }
 
+  const handleDebugClick = () => {
+    console.log(yasqe.getValue());
+  }
 
   return(
     <div className="App">
@@ -424,12 +440,14 @@ function App(){
 
           <table className="Buttons">
             <tbody>
-              <tr className="ButtonsTable">
+              <tr className="ButtonsTable1">
                 <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryMouseDown()} onClick={() => handleCommitQueryClick()}>Commit Query</button></th>
                 <th><button id="resumeQueryButton" onMouseDown={() => handleResumeMouseDown()} onClick={() => handleResumeClick()}>Next Quantum</button></th>
                 <th><button id="autoRunQueryButton" onMouseDown={() => handleAutoRunMouseDown()} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
+              </tr>
+              <tr className="ButtonsTables2">
                 <th><button id='stopAutoRun' onClick={() => handleStopAutoRunClick()}>Stop Auto-Run</button></th>
-                <th><button id='debugButton' onClick={() => {console.log(yasqe)}}>Debug Button</button></th>
+                <th><button id='debugButton' onClick={() => {handleDebugClick()}}>Debug Button</button></th>
                 <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
             </tbody>
@@ -442,6 +460,18 @@ function App(){
     
 
       <div className="MainGraphWithMetrics">
+        
+        <div className="Metrics">
+          <div className="MetricsContent">
+            Export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
+            Import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
+            Cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
+            Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
+            Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
+            Progression:<br/>
+            <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
+          </div>
+        </div>      
         <div className="MainGraph">
           <ReactFlow
             nodes={nodes} 
@@ -454,17 +484,6 @@ function App(){
               <Controls/>
             </ReactFlow>
         </div>
-        <div className="Metrics">
-          <div className="MetricsContent">
-            Export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
-            Import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
-            Cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
-            Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
-            Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
-            Progression:<br/>
-            <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
-          </div>
-        </div>      
       </div>
     </div>
   )

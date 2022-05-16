@@ -26,6 +26,7 @@ textarea {
 }
 
 .Header {
+  height: 23%;
   display: flex;
   resize: vertical;
   overflow: hidden;
@@ -34,22 +35,22 @@ textarea {
 
 .CreditsAndUsefulLinks {
   text-align: center;
-  width: 25%;
+  flex-basis: 20%;
   background-color: rgb(226, 170, 234);
 }
 
 .Inputs {
-  width: 75%;
+  flex-basis: 80%;
   
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+
   align-items: center;
+  justify-content: space-around;
 }
 
 .YasqeWrapper {
-  height: 80%;
   width: 50%;
-  position: relative;
 }
 
 .Buttons {
@@ -68,20 +69,25 @@ textarea {
 
 .MainGraphWithMetrics {
   width: 100%;
-  display: flex;
+  
   flex-basis: 80%;
+
+  display: flex;
+  flex-direction: row;
   flex: 1;
 }
 
 .MainGraph {
   background-color: #c3c6cd;
-  width: 85%;
+  flex: 1;
+ 
 }
 
 .Metrics {
-  background-color: rgb(226, 170, 234);
+  background-color: rgb(209, 199, 210);
   width: 15%;
   overflow: hidden;
+  resize: horizontal;
 }
 
 .MetricsContent {
