@@ -7,11 +7,9 @@ import ContainerNode from "./ContainerNode";
 import { getTableFrom2DArray } from "../util";
 
 function ScanNode(props){
+
     const nodeData = props;
 
-
-    const focus = () => {};
-    const unfocus = () => {};
     //This formula can be found in SaGe engine's source code (Hey Wang ! :D)
     //Update : it doesn't work 
 
@@ -23,32 +21,29 @@ function ScanNode(props){
     const coverage = 100 * props.data.produced / props.data.cardinality;
 
     const content = 
-    <div className="QueryNode">
-      <div className="Handles">
-        <Handle type='source' position="top"/>
-      </div>
-      <div className="MainData">
-        
-        {getTableFrom2DArray([
-          ["SUBJECT",nodeData.data.pattern.subject],
-          ["PREDICATE", nodeData.data.pattern.predicate],
-          ["OBJECT", nodeData.data.pattern.object]
-        ])}
-        <br/>
-        Cardinality: {nodeData.data.cardinality}<br/>
-        <NodeProgressSlideBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
-      </div>
-    <div className="DisplayData">
+      <div className="QueryNode">
+        <div className="Handles">
+          <Handle type='source' position="top"/>
+        </div>
+        <div className="MainData">
+          {getTableFrom2DArray([
+            ["SUBJECT",nodeData.data.pattern.subject],
+            ["PREDICATE", nodeData.data.pattern.predicate],
+            ["OBJECT", nodeData.data.pattern.object]
+          ])}
+          <br/>
+          Cardinality: {nodeData.data.cardinality}<br/>
+          <NodeProgressSlideBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
+        </div>
+        <div className="DisplayData">
     
-    CumulativeCardinality: <br/>{nodeData.data.cumulativeCardinality}<br/>
+          CumulativeCardinality: <br/>{nodeData.data.cumulativeCardinality}<br/>
 
-    PatternCardinality: <br/>{nodeData.data.patternCardinality}<br/>
-    PatternProduced: <br/>{nodeData.data.patternProduced}<br/>
-    Produced: <br/>{nodeData.data.produced}<br/>
-    </div>
-
-    
-</div>
+          PatternCardinality: <br/>{nodeData.data.patternCardinality}<br/>
+          PatternProduced: <br/>{nodeData.data.patternProduced}<br/>
+          Produced: <br/>{nodeData.data.produced}<br/>
+        </div>
+      </div>
 
     return (
       <ContainerNode content={content} childProps={nodeData}></ContainerNode>  

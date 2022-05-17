@@ -1,19 +1,15 @@
-//TODO: Clean les imports
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import ReactFlow, {
-  addEdge,
   Controls,
-  ConnectionLineType,
   useNodesState,
   useEdgesState,
-  MiniMap,
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 import {
-  protoplan_to_graph
+  nextLink_to_graph
 } from './parser';
 import ProjectionNode from './nodes/ProjectionNode';
 import JoinNode from './nodes/JoinNode';
@@ -81,24 +77,12 @@ function App(){
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
     
-  //componentDidMount equivalent. It is used to create the yasqe editor once, when the page is loaded
+  //componentDidMount equivalent. It is used to create the yasqe editor once and only once, when the page is loaded
   useEffect(() => {
       const newYasqe = YASQE(document.getElementById("YasqeEditor"));
       newYasqe.setValue(sparqlRequest["query"]);
       setYasqe(newYasqe);
   }, []);
-
-  useEffect(() => {
-    
-  }, [yasqe])
-
-  useEffect(() => {
-    if(yasqe === undefined){
-      console.log("yasqe is undefined");
-    } else {
-      console.log("yasqe is defined");
-    }
-  })
 
   //nextLink watcher for autorun
   useEffect(() => {
@@ -107,6 +91,10 @@ function App(){
     }
   }, [nextLink]);
 
+  /**
+   * Update the rendering of the main stats of the query execution
+   * @param {*} queryStats The new stats to be displayed
+   */
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
     setImportMetric(queryStats["import"]);
@@ -116,6 +104,9 @@ function App(){
     setProgressionMetric(queryStats["metrics"]["progression"]);
   }
 
+  /**
+   * Reset stats to their default value, 0
+   */
   const resetStats = () => {
     setExportMetric(0);
     setImportMetric(0);
@@ -124,6 +115,7 @@ function App(){
     setCoverageMetric(0);
     setProgressionMetric(0);
   }
+
 
   const stats={
    exportMetric: exportMetric,
@@ -134,7 +126,12 @@ function App(){
    progressionMetric: progressionMetric, 
   }
 
-  //Lays out a graph composed of #nodes and #edges
+  /**
+   * Lays out a graph to have a readable shape
+   * @param {*} nodes The array of nodes from the graph to be layed out
+   * @param {*} edges The array of edges from the graph to be layed out
+   * @returns An object composed of the array of nodes with updated positions and the array of edges
+   */
   const layoutElements = (nodes, edges) => {
     dagreGraph.setGraph({ rankdir: 'BT', align: ''});
   
@@ -163,8 +160,10 @@ function App(){
     return { nodes, edges };
   };
  
-
-  //Takes an array of graph elements (nodes and edges) and sets it as the displayed graph, and updates nodes and edges arrays accordingly
+  /**
+   * Takes a graph and updates the nodes and edges arrays accordingly, and lays out the graph
+   * @param {*} graph The array of elements (nodes and edges) from which the graph is going to be created
+   */
   const createGraph = (graph) => {
 
   var newNodes = [];
@@ -184,13 +183,16 @@ function App(){
 
     layoutElements(newNodes, newEdges);
 
-    setNodes(newNodes);
-    nodes = newNodes;
     setEdges(newEdges);
 
+    setNodes(newNodes);
+    nodes = newNodes;
   }
 
-
+  /**
+   * Updates data dislayed inside the nodes of a graph, without changing its current layout
+   * @param {*} graph The graph to be updated
+   */
   const updateGraph = (graph) => {
     var newNodes = [];
 
@@ -225,13 +227,14 @@ function App(){
       })
     })
 
-    
-    
     setNodes(newNodes);
    
   }
 
-  //Starts the process of parsing the query and sending the query to the SaGe server 
+  /**
+   * Starts the processing of a query by sending it to SaGe server and creating a graph according to the response's nextLink
+   * @returns A promise of response from the query sent to the SaGe server
+   */
   const commitQuery = () => {
     setIsQueryEditable(false);
 
@@ -250,7 +253,7 @@ function App(){
 
       if(data["hasNext"]){
 
-        let graphElements = protoplan_to_graph(data["next"]);
+        let graphElements = nextLink_to_graph(data["next"]);
         createGraph(graphElements);
         setNextLink(data["next"]);
         setIsQueryResumeable(true);
@@ -271,7 +274,10 @@ function App(){
     return promise;
   }
 
-  //Sends the next part of the ongoing query
+  /**
+   * Sends the next part of the ongoing query to the SaGe server
+   * @returns A promise of response from the query sent to the SaGe server 
+   */
   const commitNext = () => {
 
     //From the initial query
@@ -296,13 +302,13 @@ function App(){
 
         if(!false/*A remplacer par un check de modification de la query?*/){//The query isn't over and user hasn't modified the query execution plan since the last quantum
           
-          let graphElements = protoplan_to_graph(data["next"]);
+          let graphElements = nextLink_to_graph(data["next"]);
           updateGraph(graphElements);
         
         } else {//The query isn't over but user has modified the query execution plan since the last quantum
         
           console.log("How did you get there? Query exec plan modification isn't even implemented yet...")
-          let graphElements = protoplan_to_graph(data["next"]);
+          let graphElements = nextLink_to_graph(data["next"]);
           createGraph(graphElements);
         }
         
@@ -322,7 +328,9 @@ function App(){
     return promise;
   }
 
-  //
+  /**
+   * Starts the process of running the whole query automatically
+   */
   function autoRunQuery(){
     commitQuery().then(
       (response) => {
@@ -338,8 +346,9 @@ function App(){
     )
   }
 
-
-  //Sends a request for one quantum and changes the value of isAutoRunOn according to the response
+  /**
+   * Sends the next part of the ongoing query as long as the last response had a non null nextLink
+   */
   function commitNextUntilQueryIsOver(){
     commitNext().then((data) => {
       
@@ -348,6 +357,11 @@ function App(){
     });
   }
 
+  /**
+   * Sets the current sparqlRequest's query to the rawQuery parameter, while removing useless spaces and line breaks
+   * @param {*} rawQuery The unprocessed query to be set as the current sparqlRequest query
+   * @returns The stringified sparqlRequest with the new query
+   */
   const createRequest = (rawQuery) => {
     const queryWithoutUselessCharacters = rawQuery.replace(/\r?\n|\r/g, "");
     sparqlRequest["query"] = queryWithoutUselessCharacters;
@@ -355,13 +369,16 @@ function App(){
     return JSON.stringify(sparqlRequest);
   }
 
+  /**
+   * QueryInput getter
+   * @returns The current value of the yasqe query editor
+   */
   const getQueryInput = () => {
-    console.log(yasqe.getValue());
-    console.log(yasqe.getValue());
     return yasqe.getValue();
   }
 
-  //Button input handling
+  /*Button input handling*/
+
   const handleCommitQueryMouseDown = () => {
     setQuery(createRequest(getQueryInput()));
   }

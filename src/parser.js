@@ -4,15 +4,17 @@ import { MarkerType } from 'react-flow-renderer';
 var proto = require('./iterators_pb');
 
 
-const leaf = ['valuesSource', 'scanSource', 'insertSource', 'deleteSource', 'valuesLeft', 'valuesRight', 'scanLeft', 'scanRight', 'deleteLeft', 'deleteRight', 'insertLeft', 'insertRight'];
-const is_leaf = (op) => {
-  return leaf.includes(op);
-}
-
-const node = ['projSource', 'joinSource', 'unionSource', 'filterSource', 'projLeft', 'projRight', 'joinLeft', 'joinRight', 'unionLeft', 'unionRight', 'filterLeft', 'filterRight'];
+const node = ['projSource', 'joinSource', 'unionSource', 'filterSource', 'projLeft', 'projRight', 'joinLeft', 'joinRight', 'unionLeft', 'unionRight', 'filterLeft', 'filterRight','valuesSource', 'scanSource', 'insertSource', 'deleteSource', 'valuesLeft', 'valuesRight', 'scanLeft', 'scanRight', 'deleteLeft', 'deleteRight', 'insertLeft', 'insertRight'];
+/**
+ * 
+ * @param {*} op The operator to be checked 
+ * @returns true if the operator is a 
+ */
 const is_node = (op) => {
   return node.includes(op);
 }
+
+
 
 const node_factory = (obj, key, id) => {
   var node = {
@@ -101,16 +103,15 @@ const plan_request_to_graph = (obj) => {
   var id = 0;
 
   while (queue.length > 0){
-    var [o, parentId] = queue.shift();
+    var [currentNode, parentId] = queue.shift();
     
     
-    for (var key in o){
-    
-      if (o[key] !== undefined && (is_node(key) || is_leaf(key))){
+    for (var key in currentNode){
+      if (currentNode[key] !== undefined && (is_node(key))){
 
-        nodes.push(node_factory(o, key, id));
+        nodes.push(node_factory(currentNode, key, id));
 
-        queue.push([o[key], id]);
+        queue.push([currentNode[key], id]);
 
         if(parentId !== null){
           edges.push({
@@ -138,7 +139,7 @@ const plan_request_to_graph = (obj) => {
   return nodes.concat(edges);
 }
 
-export function protoplan_to_graph(plan) {
+export function nextLink_to_graph(plan) {
   var decodeplan = Buffer.from(plan, 'base64');
 
   var jsonplan = proto.RootTree.deserializeBinary(new Uint8Array(decodeplan)).toObject();

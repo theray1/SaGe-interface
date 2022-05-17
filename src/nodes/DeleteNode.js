@@ -5,26 +5,24 @@ import ContainerNode from "./ContainerNode";
 
 function DeleteNode(props){
 
-  const focus = () => {};
-  const unfocus = () => {};
-
   const nodeData = props;
 
-    const content = 
+  const content = 
     <div className="QueryNode">
-
-      <div className="Label">{props.data.label}</div>
+      <div className="Label">
+        {props.data.label}
+      </div>
       <div className="Handles">
-    <Handle type='source' position="top"/>
-    <Handle type='target' position="bottom"/>
+        <Handle type='source' position="top"/>
+        <Handle type='target' position="bottom"/>
+      </div>
+      <div className="DataDisPlay">
+        nbInserted: <br/>{nodeData.data.nbInserted}<br/>
+      </div>
     </div>
-    <div className="DataDisPlay">
-    nbInserted: <br/>{nodeData.data.nbInserted}<br/>
-    </div>
-</div>
 
   return (
-    <ContainerNode content={content} childProps={nodeData} focus={focus} unfocus={unfocus}></ContainerNode>  
+    <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
   );
 }
 

@@ -5,11 +5,6 @@ import './ContainerNode.css';
 const ContainerNode = (props) => {
 
     const toggleNodeCollapse = (node) => {
-
-      const test1 = node.getElementsByClassName("ContainedNode")[0];
-
-      const test2 = test1.getElementsByClassName("QueryNode")[0];
-
       const section = node.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
 
       const isExpanded = section.getAttribute('data-expanded') === 'true';
@@ -33,6 +28,7 @@ const ContainerNode = (props) => {
 
     //Shameless copy pasta from https://css-tricks.com/using-css-transitions-auto-dimensions/
     function collapseNode(element) {
+
         // get the height of the element's inner content, regardless of its actual size
         var sectionHeight = element.scrollHeight;
         
@@ -59,6 +55,7 @@ const ContainerNode = (props) => {
       }
       
     function expandNode(element) {
+      
         // get the height of the element's inner content, regardless of its actual size
         var sectionHeight = element.scrollHeight;
         

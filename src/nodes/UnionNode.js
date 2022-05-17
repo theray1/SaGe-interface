@@ -6,17 +6,18 @@ function UnionNode(props){
 
   const nodeData = props;
 
-
-  const focus = () => {};
-  const unfocus = () => {};
-    const content = <div className="QueryNode">
-      <div className="Label">{props.data.label}</div>
-    <div className="Handles">
-    <Handle type='source' position="top"/>
-    <Handle type='target' position="bottom"/>
+  const content = 
+  <div className="QueryNode">
+    <div className="Label">
+      {props.data.label}
     </div>
-    <div className="DisplayData"></div>
-</div>
+    <div className="Handles">
+      <Handle type='source' position="top"/>
+      <Handle type='target' position="bottom"/>
+    </div>
+    <div className="DisplayData">
+    </div>
+  </div>
 
     return (
       <ContainerNode content={content} childProps={nodeData}></ContainerNode>  

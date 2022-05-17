@@ -7,9 +7,6 @@ const ProjectionNode = (props) => {
 
 	const nodeData = props;
 
-  const focus = () => {};
-  const unfocus = () => {};
-
   const cleanAttributeDisplay = () => {
     return (
       nodeData.data.valuesList.map((value) => {
@@ -23,16 +20,19 @@ const ProjectionNode = (props) => {
     )
   }
 
-    const content = <div className="QueryNode">
-      <div className="Label">{props.data.label}</div>
-                        <div className="Handles">
-    <Handle type='source' position="top"/>
-    <Handle type='target' position="bottom"/>
+  const content = 
+    <div className="QueryNode">
+      <div className="Label">
+        {props.data.label}
+      </div>
+      <div className="Handles">
+        <Handle type='source' position="top"/>
+        <Handle type='target' position="bottom"/>
+      </div>
+      <div className="DisplayData">
+        Projection sur les attributs: <br/>{cleanAttributeDisplay()}
+      </div>
     </div>
-    <div className="DisplayData">
-                        Projection sur les attributs: <br/>{cleanAttributeDisplay()}
-                  </div>
-                  </div>
 
   return (
     <ContainerNode content={content} childProps={nodeData}></ContainerNode>  
