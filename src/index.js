@@ -52,12 +52,15 @@ function App(){
   let sparqlServer = "http://localhost:8000/sparql";
 
   const [yasqe, setYasqe] = useState();
-
+  
   const [query, setQuery] = useState(null);
 
-  const [isQueryEditable, setIsQueryEditable] = useState(true);
+  const [stateManager, setStateManager] = useState(null);
+
+  const [isQueryCommitable, setIsQueryCommitable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);
+
 
   const nodeWidth = 600;
   const nodeHeight = 250;
@@ -77,11 +80,14 @@ function App(){
   const [coverageMetric, setCoverageMetric] = useState("");
   const [progressionMetric, setProgressionMetric] = useState("");
     
-  //componentDidMount equivalent. It is used to create the yasqe editor once and only once, when the page is loaded
+  //componentDidMount equivalent. It is used to create the yasqe editor and the state manager once and only once, when the page is loaded
   useEffect(() => {
       const newYasqe = YASQE(document.getElementById("YasqeEditor"));
       newYasqe.setValue(sparqlRequest["query"]);
       setYasqe(newYasqe);
+
+      const newStateManager = new StateManager();
+      setStateManager(newStateManager);
   }, []);
 
   //nextLink watcher for autorun
@@ -133,18 +139,24 @@ function App(){
    * @returns An object composed of the array of nodes with updated positions and the array of edges
    */
   const layoutElements = (nodes, edges) => {
+    
+    //Sets the direction of the graph to bottom-to-top
     dagreGraph.setGraph({ rankdir: 'BT', align: ''});
   
+    //Provides dagre with each node, and the space between them
     nodes.forEach((node) => {
       dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
     });
   
+    //Provides dagre with the relation between each node
     edges.forEach((edge) => {
       dagreGraph.setEdge(edge.source, edge.target);
     });
   
+    //Computes the position of each node on the graph
     dagre.layout(dagreGraph);
   
+    //Sets each node's position to the position computed by dagre
     nodes.forEach((node) => {
       const nodeWithPosition = dagreGraph.node(node.id);
       node.targetPosition =  'top';
@@ -157,20 +169,28 @@ function App(){
         y: nodeWithPosition.y - nodeHeight / 2,
       };
     });
+
+    //We do not need to use the returned value, as the node passed as arguments are direcly modified
     return { nodes, edges };
   };
+
+  const isNode = (element) => {
+    //This condition verifies that element is a node, since all nodes always have a position but edges never do
+    return element.position !== undefined;
+  }
  
   /**
    * Takes a graph and updates the nodes and edges arrays accordingly, and lays out the graph
-   * @param {*} graph The array of elements (nodes and edges) from which the graph is going to be created
+   * @param {*} newGraph The array of elements (nodes and edges) from which the graph is going to be created
    */
-  const createGraph = (graph) => {
+  const createGraph = (newGraph) => {
 
-  var newNodes = [];
-  var newEdges = [];
+    var newNodes = [];
+    var newEdges = [];
 
-    graph.forEach(element => {
-      if(element.position !== undefined){
+    //Iterates over every element of newGraph to separate nodes and edges
+    newGraph.forEach(element => {
+      if(isNode(element)){
 
         newNodes.push(element);
       
@@ -181,35 +201,59 @@ function App(){
       }
     })
 
+    //Computes the position of the elements of the graph
     layoutElements(newNodes, newEdges);
 
+
+    //Sets the current graph to the one created from newGraph 
+
+    //Sets the edges of newGraph as the edges of the current graph 
     setEdges(newEdges);
 
+    //Sets the nodes of newGraph as the nodes of the current graph
     setNodes(newNodes);
+
+
+    //setNodes does not instantly modifies the value of the nodes hook; this is a problem for the auto run and only using setNodes will cause the graph to be properly
+    //laid out only for the first quantum. The only fix I could find was to manually modify the nodes hook.
+    //This is not the intented way to use hooks and this probably shouldn't be done this way.
     nodes = newNodes;
   }
 
   /**
-   * Updates data dislayed inside the nodes of a graph, without changing its current layout
-   * @param {*} graph The graph to be updated
+   * Updates data dislayed inside the nodes of the current graph based on the data of a new graph, without changing its current layout
+   * This is meant to be used when graph has the same nodes and edges as the current graph, but the data inside each node is different
+   * @param {*} newGraph The graph to be updated
    */
-  const updateGraph = (graph) => {
+  const updateGraph = (newGraph) => {
     var newNodes = [];
 
-    graph.forEach(element => {
-      if(element.position !== undefined){//The element has a position, thus it is a node
+    //Iterates over every element of graph to keep only the nodes in newNodes
+    newGraph.forEach(element => {
+      if(isNode(element)){
 
         newNodes.push(element);
         
       }
     })
 
+    
     newNodes.forEach((newNode) => {
       nodes.forEach((oldNode) => {
         if(oldNode.id === newNode.id){
+          //The following code is executed only when we find a node from newGraph with same id as a node from the current graph. 
+          //This means they represent the same node, and the data of the node from the current graph needs to be replaced with 
+          //the data from the node from newGraph
+
+
           
           if(document.activeElement === document.getElementById(newNode.id)){
-          
+            //The following code is executed only when the node currently being updated corresponds to a node being dragged by the user at the same time
+            //We cannot simply set the new position to the one at the beginning of the last quantum, since it probably isn't currently the actual position of the node
+            //Instead, we can use xPos and yPos which are not tied to the JSON representation of the node
+            //This fix is a bit of a workaround, as it required the position to be included in the HTML attributes of the node and there is probably an easier way to do it
+            //But at least, it works
+
             var newX = parseInt(document.getElementById(newNode.id).getAttribute("xposition"), 10);
             var newY = parseInt(document.getElementById(newNode.id).getAttribute("yposition"), 10);
             
@@ -236,7 +280,7 @@ function App(){
    * @returns A promise of response from the query sent to the SaGe server
    */
   const commitQuery = () => {
-    setIsQueryEditable(false);
+    setIsQueryCommitable(false);
 
     let fetchData = {
       method: 'POST',
@@ -314,7 +358,7 @@ function App(){
         
       } else {//Query is over
         
-        setIsQueryEditable(true);
+        setIsQueryCommitable(true);
         setIsQueryResumeable(false);
       
       }
@@ -384,7 +428,7 @@ function App(){
   }
 
   const handleCommitQueryClick = () => {
-    if(isQueryEditable){
+    if(isQueryCommitable){
       commitQuery();
     }
   }
@@ -407,7 +451,7 @@ function App(){
 
   const handleAutoRunClick = () => {
     if(nextLink === null){
-      if(isQueryEditable){
+      if(isQueryCommitable){
         autoRunQuery();
       }
     } else {
