@@ -442,8 +442,8 @@ function App(){
             </li>
           </ul>
           <div className="About">
-            This project has been made possible thanks to: LS2N, Hala Skaf-Molli, Pascal Molli, Julien, Wang and Vincent. 
-            <br/>It has been realized during a two-month internship (April - May 2022) by Erwan Boisteau-Desdevises. 
+            Thanks to: LS2N, Hala Skaf-Molli, Pascal Molli, Julien, Wang and Vincent. 
+            <br/>Author : Erwan Boisteau-Desdevises
           </div>
         </div>
 
@@ -486,7 +486,10 @@ function App(){
             Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
             Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
             Progression:<br/>
-            <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
+            <div id="QueryProgressBarContainer" className="QueryProgressBarContainer">
+              <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
+            </div>
+              
           </div>
         </div>      
         <div className="MainGraph">

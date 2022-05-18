@@ -4,7 +4,7 @@ function QueryProgressSlideBar(props){
 
     const backgroundColor = props.backgroundColor;
     const progressBarColor = props.progressBarColor;
-    const height = 23;
+    const height = "100%";
     const width = "100%";
     const fontSize = "140%";
     const fontColor = "white";
@@ -14,12 +14,8 @@ function QueryProgressSlideBar(props){
 
     return (
         <SlideBar backgroundColor={backgroundColor} 
-            progressBarColor={progressBarColor} 
-            height={height} 
-            width={width} 
-            fontSize={fontSize} 
+            progressBarColor={progressBarColor}
             fontColor={fontColor} 
-            labelPadding={labelPadding} 
             progressValue={progressValue}/>
     )
 

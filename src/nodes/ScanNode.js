@@ -29,11 +29,13 @@ function ScanNode(props){
           {getTableFrom2DArray([
             ["SUBJECT",nodeData.data.pattern.subject],
             ["PREDICATE", nodeData.data.pattern.predicate],
-            ["OBJECT", nodeData.data.pattern.object]
+            ["OBJECT", nodeData.data.pattern.object],
+            ["Cardinality", nodeData.data.cardinality]
           ])}
           <br/>
-          Cardinality: {nodeData.data.cardinality}<br/>
-          <NodeProgressSlideBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
+          <div id={"NodeProgressBarContainer" + nodeData.id} className="NodeProgressBarContainer">
+            <NodeProgressSlideBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
+          </div>
         </div>
         <div className="DisplayData">
     

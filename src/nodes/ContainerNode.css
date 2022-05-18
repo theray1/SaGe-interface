@@ -29,12 +29,8 @@
     font-size: 250%;
 }
 
-.ContainerNodeFocused .SlideBar{
-    height: 50px;
-}
-
-.ContainerNodeFocused .NodeProgressSlideBar {
-    font-size: 170%;
+.ContainerNodeFocused .NodeProgressBarContainer{
+    font-size: 190%;
 }
 
 .ContainedNode {
@@ -61,10 +57,10 @@
     text-align: center;
 }
 
-.NodeProgressSlideBar .SlideBar {
+.NodeProgressBarContainer  {
     margin-bottom: 1.5%;
-
-    transition: height 0.5s;
+    font-size: 120%;
+    height: fit-content;
 }
 
 th {

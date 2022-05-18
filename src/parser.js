@@ -6,16 +6,22 @@ var proto = require('./iterators_pb');
 
 const node = ['projSource', 'joinSource', 'unionSource', 'filterSource', 'projLeft', 'projRight', 'joinLeft', 'joinRight', 'unionLeft', 'unionRight', 'filterLeft', 'filterRight','valuesSource', 'scanSource', 'insertSource', 'deleteSource', 'valuesLeft', 'valuesRight', 'scanLeft', 'scanRight', 'deleteLeft', 'deleteRight', 'insertLeft', 'insertRight'];
 /**
- * 
- * @param {*} op The operator to be checked 
- * @returns true if the operator is a 
+ * Checks if a key is a query operator
+ * @param {*} key The key to be checked 
+ * @returns true if key is an operator, false otherwise 
  */
-const is_node = (op) => {
-  return node.includes(op);
+const is_node = (key) => {
+  return node.includes(key);
 }
 
 
-
+/**
+ * Creates a node according to the key present in the JSON object
+ * @param {*} obj The JSON object representing a subtree of a the execution plan tree
+ * @param {*} key A child of the object
+ * @param {*} id The id of the created node 
+ * @returns A JSON object representing a node for a react flow graph
+ */
 const node_factory = (obj, key, id) => {
   var node = {
     id: id.toString(),
@@ -95,7 +101,11 @@ const node_factory = (obj, key, id) => {
 }
 
 
-
+/**
+ * Translates a JSON object representing a query execution plan into an array representing a react flow graph
+ * @param {*} obj The JSON object representing a query execution plan
+ * @returns An array of nodes and edges
+ */
 const plan_request_to_graph = (obj) => {
   var nodes = [];
   var edges = [];
@@ -139,12 +149,17 @@ const plan_request_to_graph = (obj) => {
   return nodes.concat(edges);
 }
 
-export function nextLink_to_graph(plan) {
-  var decodeplan = Buffer.from(plan, 'base64');
+/**
+ * Translates a nextLink into array representing a react flow graph
+ * @param {*} nextLink The nextLink to be translated
+ * @returns An array of nodes and edges
+ */
+export function nextLink_to_graph(nextLink) {
+  var bufferedPlan = Buffer.from(nextLink, 'base64');
 
-  var jsonplan = proto.RootTree.deserializeBinary(new Uint8Array(decodeplan)).toObject();
+  var jsonPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan)).toObject();
   
-  const graph = plan_request_to_graph(jsonplan);
+  const graph = plan_request_to_graph(jsonPlan);
 
   return graph;
 }

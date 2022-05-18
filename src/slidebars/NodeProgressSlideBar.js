@@ -13,17 +13,15 @@ function NodeProgressSlideBar(props){
 
 
   return (
-    <div className="NodeProgressSlideBar">
-      <SlideBar
-          backgroundColor={backgroundColor} 
-          progressBarColor={progressBarColor} 
-          height={height} 
-          width={width} 
-          fontSize={fontSize} 
-          fontColor={fontColor} 
-          labelPadding={labelPadding} 
-          progressValue={progressValue}/>
-    </div>
+    <SlideBar
+        backgroundColor={backgroundColor} 
+        progressBarColor={progressBarColor} 
+        height={height} 
+        width={width} 
+        fontSize={fontSize} 
+        fontColor={fontColor} 
+        labelPadding={labelPadding} 
+        progressValue={progressValue}/>
   )
 
 }
