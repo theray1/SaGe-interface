@@ -1,12 +1,13 @@
-
-class StateManager {
+//This class is used to restreint user input. This prevents mistakes and inconsistent display of the progression of the query
+export default class StateManager {
 
 
     //Possible states : preQuery, midQuery, waitForResponse, midAutoRun, postQuery
     #state;
 
     constructor(){
-        this.#state = "preQuery";
+        this.#state = "preCommit";
+
     }
 
     getState(){
@@ -17,63 +18,28 @@ class StateManager {
         this.#state = newState;
     }
 
-    //Start -> 
-    commitQuery(){
-        if(this.getState() === "preQuery"){
-            this.setState("waitForResponse");
-            return true;
-        }
-        return false;
+    canCommit(){
+        return this.#state === "preCommit" || this.#state === "postQueryEnd";
     }
 
-    startAutoRun(){
-        if(this.getState() === "preQuery"){
-            this.setState("midAutoRun");
-            return true;
-        }
-        return false;
+    canNext(){
+        return this.#state === "betweenSteps";
     }
 
-    commitNextQuantum(){
-        if(this.getState() === "midQuery"){
-            this.setState("waitForResponse");
-            return true;
-        }
-        return false;
+    canAutoRun(){
+        return this.#state === "betweenSteps";
     }
 
-    resumeAutoRun(){
-        if(this.getState() === "midQuery"){
-            this.setState("midAutoRun");
-            return true;
-        }
-        return false;
+    canStopAutoRun(){
+        return this.#state === "autoRun";
     }
 
-    receiveResponse(){
-        if(this.getState() === "waitForResponse"){
-            this.setState("midQuery");
-            return true;
-        }
-        return false;
+    canOffSetNext(){
+        return this.#state = "betweenSteps";
     }
 
-    receiveFinalResponse(){
-        if(this.getState() === "waitForResponse" && this.getState() === "midAutoRun"){
-            this.setState("postQuery");
-            return true;
-        }
-        return false;
+    isAutoRunOn(){
+        return this.#state === "autoRun";
     }
-
-    stopAutoRun(){
-        if(this.getState() === "midAutoRun"){
-            this.setState("midQuery");
-            return true;
-        }
-        return false;
-    }
-
-
 
 }

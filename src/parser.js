@@ -158,6 +158,8 @@ export function nextLink_to_graph(nextLink) {
   var bufferedPlan = Buffer.from(nextLink, 'base64');
 
   var jsonPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan)).toObject();
+
+  console.log(jsonPlan);
   
   const graph = plan_request_to_graph(jsonPlan);
 

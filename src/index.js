@@ -23,6 +23,7 @@ import { roundDownFiveDecimals } from './util';
 import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
 import YASQE from 'yasgui-yasqe';
 import "./yasqe.css";
+import StateManager from './stateManager';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -55,11 +56,13 @@ function App(){
   
   const [query, setQuery] = useState(null);
 
-  const [stateManager, setStateManager] = useState(null);
+  const [stateManager, setStateManager] = useState(new StateManager());
 
-  const [isQueryCommitable, setIsQueryCommitable] = useState(true);
+  const [nextLink, setNextLink] = useState(null);
+
+  /*const [isQueryCommitable, setIsQueryCommitable] = useState(true);
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
-  const [isAutoRunOn, setIsAutoRunOn] = useState(false);
+  const [isAutoRunOn, setIsAutoRunOn] = useState(false);*/
 
 
   const nodeWidth = 600;
@@ -67,8 +70,6 @@ function App(){
   
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-  const [nextLink, setNextLink] = useState(null);
 
   var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -85,15 +86,12 @@ function App(){
       const newYasqe = YASQE(document.getElementById("YasqeEditor"));
       newYasqe.setValue(sparqlRequest["query"]);
       setYasqe(newYasqe);
-
-      const newStateManager = new StateManager();
-      setStateManager(newStateManager);
   }, []);
 
-  //nextLink watcher for autorun
+  //Auto Run watcher. Whenever the nextLink is updated, if auto run is enabled, calls the fetchNext() function
   useEffect(() => {
-    if(isAutoRunOn && nextLink !== null){
-      commitNextUntilQueryIsOver();
+    if(stateManager.isAutoRunOn() && nextLink !== null){
+      fetchNext();
     }
   }, [nextLink]);
 
@@ -131,6 +129,8 @@ function App(){
    coverageMetric: coverageMetric,
    progressionMetric: progressionMetric, 
   }
+
+  //-----------------------------------------------------------------------------------GRAPH MANAGEMENT-------------------------------------------------------------------------------------------------------
 
   /**
    * Lays out a graph to have a readable shape
@@ -275,13 +275,9 @@ function App(){
    
   }
 
-  /**
-   * Starts the processing of a query by sending it to SaGe server and creating a graph according to the response's nextLink
-   * @returns A promise of response from the query sent to the SaGe server
-   */
-  const commitQuery = () => {
-    setIsQueryCommitable(false);
+  //-----------------------------------------------------------------------------------QUERY MANAGEMENT-------------------------------------------------------------------------------------------------------
 
+  const __commitQuery = (query) => {
     let fetchData = {
       method: 'POST',
       body: query,
@@ -292,6 +288,13 @@ function App(){
     }
 
     let promise = fetch(sparqlServer, fetchData)
+
+    return promise;
+  }
+
+  const __responseCommitQuery = (promise) => {
+
+    let returnPromise = promise
     .then(res => res.json())
     .then(data => {
 
@@ -299,34 +302,40 @@ function App(){
 
         let graphElements = nextLink_to_graph(data["next"]);
         createGraph(graphElements);
-        setNextLink(data["next"]);
-        setIsQueryResumeable(true);
+        
 
       } else {
 
         alert("All the elements were found in one quantum! If you would like to have the data, and a more detailed execution plan, please reduce the max_results attribute or the quota attribute in your config file");
-      
+        stateManager.setState("postQueryEnd");
+
       }
 
-
       updateStats(data["stats"]);
-      
+
+      setNextLink(data["next"]);
+
       return data;
     })
     .catch(error => {console.log("Error caught"); console.log(error)});
 
-    return promise;
+    return returnPromise;
   }
 
   /**
-   * Sends the next part of the ongoing query to the SaGe server
-   * @returns A promise of response from the query sent to the SaGe server 
+   * Starts the processing of a query by sending it to SaGe server and creating a graph according to the response's nextLink
+   * @returns A promise of response from the query sent to the SaGe server
    */
-  const commitNext = () => {
+  const commitQuery = (query) => {
 
-    //From the initial query
+    var promise = __commitQuery(query);
+    return __responseCommitQuery(promise);
+
+  }
+
+  const __fetchNext = () => {
+    
     const queryTemp = JSON.parse(query);
-    //We add the next link to the query object, so that once we send the query, the SaGe server knows where it last stopped
     queryTemp["next"] = nextLink;
 
     let fetchInstructions = {
@@ -339,28 +348,25 @@ function App(){
     }
 
     let promise = fetch(sparqlServer, fetchInstructions)
+
+    return promise;
+  }
+
+  const __responseFetchNext = (promise) => {
+
+    let returnPromise = promise
     .then(res => res.json())
     .then(data => {
 
-      if(data["hasNext"]){
-
-        if(!false/*A remplacer par un check de modification de la query?*/){//The query isn't over and user hasn't modified the query execution plan since the last quantum
-          
-          let graphElements = nextLink_to_graph(data["next"]);
-          updateGraph(graphElements);
-        
-        } else {//The query isn't over but user has modified the query execution plan since the last quantum
-        
-          console.log("How did you get there? Query exec plan modification isn't even implemented yet...")
-          let graphElements = nextLink_to_graph(data["next"]);
-          createGraph(graphElements);
-        }
-        
-      } else {//Query is over
-        
-        setIsQueryCommitable(true);
-        setIsQueryResumeable(false);
+      if(data["hasNext"]) {//query isn't over
       
+        let graphElements = nextLink_to_graph(data["next"]);
+        updateGraph(graphElements);
+
+      }else {//query is over
+
+        stateManager.setState("postQueryEnd");
+
       }
 
       updateStats(data["stats"]);
@@ -369,36 +375,29 @@ function App(){
       return data;
     })
     .catch((error) => {console.log(error)});
-    return promise;
+
+    return returnPromise;
+
   }
 
   /**
-   * Starts the process of running the whole query automatically
+   * Sends the next part of the ongoing query to the SaGe server
+   * @returns A promise of response from the query sent to the SaGe server 
    */
-  function autoRunQuery(){
-    commitQuery().then(
-      (response) => {
+  const fetchNext = () => {
 
+    var promise = __fetchNext()
+    return __responseFetchNext(promise);
 
-        setIsAutoRunOn(response["hasNext"]);
-  
-  
-        if(response["hasNext"]){
-          commitNextUntilQueryIsOver();      
-        }
-      }
-    )
   }
+
 
   /**
    * Sends the next part of the ongoing query as long as the last response had a non null nextLink
    */
-  function commitNextUntilQueryIsOver(){
-    commitNext().then((data) => {
-      
-        setIsAutoRunOn(data["hasNext"]);
-      
-    });
+  function resumeAutoRun(){
+    stateManager.setState("autoRun");
+    fetchNext();
   }
 
   /**
@@ -421,47 +420,43 @@ function App(){
     return yasqe.getValue();
   }
 
-  /*Button input handling*/
-
-  const handleCommitQueryMouseDown = () => {
-    setQuery(createRequest(getQueryInput()));
+  const commitFirstQuantum = () => {
+    var q = createRequest(getQueryInput());
+    setQuery(q);
+    var promise = commitQuery(q);
+    return promise;
   }
 
-  const handleCommitQueryClick = () => {
-    if(isQueryCommitable){
-      commitQuery();
+  //-----------------------------------------------------------------------------BUTTON INPUT HANDLING--------------------------------------------------------------------------------------------------------
+
+  const handleCommitQueryClick = () => { 
+    if(stateManager.canCommit()){
+      stateManager.setState("betweenSteps");
+      commitFirstQuantum();
     }
-  }
-
-  const handleResumeMouseDown = () => {
-    setIsAutoRunOn(false);
+    
   }
 
   const handleResumeClick = () => {
-    if(isQueryResumeable){
-      commitNext();
+    if(stateManager.canNext()){
+      stateManager.setState("betweenSteps");
+      fetchNext();
     }
-  }
-
-  const handleAutoRunMouseDown = () => {
-    if(nextLink === null){
-      setQuery(createRequest(getQueryInput()));
-    }
+    
   }
 
   const handleAutoRunClick = () => {
-    if(nextLink === null){
-      if(isQueryCommitable){
-        autoRunQuery();
-      }
-    } else {
-      commitNextUntilQueryIsOver();
-      setIsAutoRunOn(true);
+    if(stateManager.canAutoRun()){
+      stateManager.setState("autoRun");
+      resumeAutoRun();
     }
+    
   }
 
   const handleStopAutoRunClick= () => {
-    setIsAutoRunOn(false);
+    if(stateManager.canStopAutoRun()){
+      stateManager.setState("betweenSteps");
+    } 
   }
 
   const handleLayoutClick = () => {
@@ -469,7 +464,7 @@ function App(){
   }
 
   const handleDebugClick = () => {
-    console.log(yasqe.getValue());
+    
   }
 
   return(
@@ -502,9 +497,9 @@ function App(){
           <table className="Buttons">
             <tbody>
               <tr className="ButtonsTable1">
-                <th><button id="commitQueryButton" onMouseDown={() => handleCommitQueryMouseDown()} onClick={() => handleCommitQueryClick()}>Commit Query</button></th>
-                <th><button id="resumeQueryButton" onMouseDown={() => handleResumeMouseDown()} onClick={() => handleResumeClick()}>Next Quantum</button></th>
-                <th><button id="autoRunQueryButton" onMouseDown={() => handleAutoRunMouseDown()} onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
+                <th><button id="commitQueryButton" onClick={() => handleCommitQueryClick()}>Commit Query</button></th>
+                <th><button id="resumeQueryButton" onClick={() => handleResumeClick()}>Next Quantum</button></th>
+                <th><button id="commitQueryAndStartAutoRunButton" onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
               </tr>
               <tr className="ButtonsTables2">
                 <th><button id='stopAutoRun' onClick={() => handleStopAutoRunClick()}>Stop Auto-Run</button></th>
