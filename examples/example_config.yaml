@@ -1,0 +1,11 @@
+name: SaGe Test server
+maintainer: Chuck Norris
+quota: 75
+max_results: 2000
+graphs:
+-
+  name: bsbm
+  uri: http://example.org/bsbm
+  description: DefinitelyAUsefulDescription
+  backend: hdt-file
+  file: ../my-react-app/examples/bsbm1k.hdt

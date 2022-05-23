@@ -1,5 +1,7 @@
 import {Buffer} from 'buffer';
+import { Message } from 'google-protobuf';
 import { MarkerType } from 'react-flow-renderer';
+import { jsonToArray } from './util';
 
 var proto = require('./iterators_pb');
 
@@ -12,6 +14,16 @@ const node = ['projSource', 'joinSource', 'unionSource', 'filterSource', 'projLe
  */
 const is_node = (key) => {
   return node.includes(key);
+}
+
+const leaf = ['scanLeft', 'scanRight', 'scanSource'];
+/**
+ * Checks if a key is a query operator
+ * @param {*} key The key to be checked 
+ * @returns true if key is an operator, false otherwise 
+ */
+ const is_leaf = (key) => {
+  return leaf.includes(key);
 }
 
 
@@ -110,22 +122,31 @@ const plan_request_to_graph = (obj) => {
   var nodes = [];
   var edges = [];
   var queue = [[obj, null]];
+  //var leaves = [];
   var id = 0;
 
   while (queue.length > 0){
     var [currentNode, parentId] = queue.shift();
-    
+
+    /*if(is_leaf(currentNode)){
+      leaves.push({
+        currentNode: currentNode,
+        id: id
+      })
+    }*/
     
     for (var key in currentNode){
       if (currentNode[key] !== undefined && (is_node(key))){
 
-        nodes.push(node_factory(currentNode, key, id));
+        var newNode = node_factory(currentNode, key, id);
+
+        nodes.push(newNode);
 
         queue.push([currentNode[key], id]);
 
         if(parentId !== null){
           edges.push({
-            id: 'e'+parentId+id,
+            id: 'e'+parentId+'-'+id,
             target: parentId.toString(),
             source: id.toString(),
             animate: 'false',
@@ -146,7 +167,15 @@ const plan_request_to_graph = (obj) => {
       }
     }
   }
+
+
   return nodes.concat(edges);
+
+  /*return {
+    graphElements: nodes.concat(edges),
+    leaves: leaves
+  }*/
+    
 }
 
 /**
@@ -155,13 +184,33 @@ const plan_request_to_graph = (obj) => {
  * @returns An array of nodes and edges
  */
 export function nextLink_to_graph(nextLink) {
-  var bufferedPlan = Buffer.from(nextLink, 'base64');
-
-  var jsonPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan)).toObject();
-
-  console.log(jsonPlan);
+  var jsonPlan = nextLink_to_jsonPlan(nextLink);
   
   const graph = plan_request_to_graph(jsonPlan);
 
   return graph;
+} 
+
+export function nextLink_to_jsonPlan(nextLink) {
+  var bufferedPlan = Buffer.from(nextLink, 'base64');
+
+  var jsonPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan)).toObject();
+
+  return jsonPlan;
+}
+
+export function jsonPlan_to_nextLink(jsonPlan) {
+
+  var content = jsonToArray(jsonPlan);
+
+  var message = new proto.RootTree(content);
+
+  var serializedMessage = message.serializeBinary();
+
+  var bufferedMessage = Buffer.from(serializedMessage, 'base64');
+
+  var nextLink = bufferedMessage.toString('base64');
+
+  return nextLink;
+
 }

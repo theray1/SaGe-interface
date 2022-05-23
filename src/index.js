@@ -9,7 +9,9 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import dagre from 'dagre';
 import {
-  nextLink_to_graph
+  nextLink_to_graph,
+  nextLink_to_jsonPlan,
+  jsonPlan_to_nextLink
 } from './parser';
 import ProjectionNode from './nodes/ProjectionNode';
 import JoinNode from './nodes/JoinNode';
@@ -24,6 +26,8 @@ import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
 import YASQE from 'yasgui-yasqe';
 import "./yasqe.css";
 import StateManager from './stateManager';
+import {Buffer} from 'buffer';
+import { Message } from 'google-protobuf';
 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
@@ -64,6 +68,7 @@ function App(){
   const [isQueryResumeable, setIsQueryResumeable] = useState(false);
   const [isAutoRunOn, setIsAutoRunOn] = useState(false);*/
 
+  var proto = require('./iterators_pb');
 
   const nodeWidth = 600;
   const nodeHeight = 250;
@@ -73,6 +78,7 @@ function App(){
 
   var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [leaves, setLeaves] = useState([]);
 
   const [exportMetric, setExportMetric] = useState("");
   const [importMetric, setImportMetric] = useState("");
@@ -301,7 +307,8 @@ function App(){
       if(data["hasNext"]){
 
         let graphElements = nextLink_to_graph(data["next"]);
-        createGraph(graphElements);
+        createGraph(graphElements/*["graphElements"]*/);
+        //setLeaves(graphElements["leaves"]);
         
 
       } else {
@@ -361,7 +368,8 @@ function App(){
       if(data["hasNext"]) {//query isn't over
       
         let graphElements = nextLink_to_graph(data["next"]);
-        updateGraph(graphElements);
+        updateGraph(graphElements/*["graphElements"]*/);
+        //setLeaves(graphElements["leaves"]);
 
       }else {//query is over
 
@@ -427,6 +435,10 @@ function App(){
     return promise;
   }
 
+  //-----------------------------------------------------------------------------QUERY MODIFICATION-----------------------------------------------------------------------------------------------------------
+
+  
+
   //-----------------------------------------------------------------------------BUTTON INPUT HANDLING--------------------------------------------------------------------------------------------------------
 
   const handleCommitQueryClick = () => { 
@@ -463,8 +475,88 @@ function App(){
     createGraph(nodes.concat(edges));
   }
 
+  
+  
+
   const handleDebugClick = () => {
+
+    let jsonPlan = nextLink_to_jsonPlan(nextLink);
+
+    console.log(jsonPlan);
+
+    setNextLink(jsonPlan_to_nextLink(jsonPlan));
+
+
+
+    // nextLink -- (Buffer.from(nextLink, 'base64')) -> bufferedPlan -- (proto.RootTree.DeserializeBinary(newUint8Array(bufferedPlan))) -> protoPlan -- (protoPlan.toObject()) -> objectJsonPlan
+    // unbufferedPlan <- (bufferedPlan.toString('base64)) -- protoPlan <- ()
+
+    /*var bufferedPlan = Buffer.from(nextLink, 'base64');
+
+    console.log("nextLink: ", nextLink);
+    console.log("bufferedPlan: ", bufferedPlan);
+
+    var unbufferedPlan = bufferedPlan.toString('base64');
+
+    console.log("unbufferedPlan: ", unbufferedPlan);
+
+    console.log(unbufferedPlan === nextLink);
+
+    var protoPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan))
+
+    var seralizedJsonPlan = protoPlan.serializeBinary();
+
+    var objectJsonPlan = protoPlan.toObject();
+
+    console.log("protoPlan: ", protoPlan);
+
+    console.log("serializedJsonPlan: ", seralizedJsonPlan);
+
+    console.log("objectJsonPlan: ", objectJsonPlan);*/
+
+    /*console.log(edges);
+
+    console.log("nextLink1: ", nextLink);
+
+    var bufferedNextLink1 = Buffer.from(nextLink, 'base64');
+
+    console.log("bufferedNextLink1: ", bufferedNextLink1);
+
+    var protoPlan1 = proto.RootTree.deserializeBinary(new Uint8Array(bufferedNextLink1));
+
+    console.log("protoPlan1: ", protoPlan1);
+
+    var jsonPlan1 = protoPlan1.toObject();
+
+    console.log(jsonPlan1);
+
+    var maybe = jsonPlan_to_nextLink(jsonPlan1);
+
+    console.log("this should be next link: ", maybe);
+    console.log("this is nextLink: ", nextLink);
+
+    console.log(maybe === nextLink);*/
+/*
+    console.log("jsonPlan1: ", jsonPlan1);
     
+    var jsonPlan2 = JSON.parse(JSON.stringify(jsonPlan1));
+
+    console.log("jsonPlan2: ", jsonPlan2);
+
+    var protoPlan2 = protoPlan1; //WHAT IS THE TRANSITION TO USE HERE INSTEAD OF protoPlan1
+
+    console.log("protoPlan2: ", protoPlan2);
+
+    var bufferedNextLink2 = Buffer.from(protoPlan2.serializeBinary());
+    //var bufferedNextLink2 = bufferedNextLink1;
+
+    console.log("bufferedNextLink2: ", bufferedNextLink2);
+
+    var nextLink2 = bufferedNextLink2.toString('base64');
+
+    console.log("nextLink2: ", nextLink2);
+
+*/
   }
 
   return(

@@ -76,7 +76,6 @@ const ContainerNode = (props) => {
 
     const node = event.target;
     toggleNodeCollapse(node);
-
   }
 
   return (

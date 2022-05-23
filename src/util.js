@@ -59,4 +59,24 @@ const getTableFrom2DArray = (data, className) => {
     )
 }
 
-export { getTableFrom2DArray, roundDownFiveDecimals };
+
+//unsure if this works perfectly, but sage does seem to accept it the way it is, like everyone should <3
+const jsonToArray = (json) => {
+    var array = [];
+
+    for(var elt in json){
+        if(json[elt] !== undefined){
+            if(json[elt].constructor === ({}).constructor){
+                array.push(jsonToArray(json[elt]));
+            } else {
+                array.push(json[elt]);
+            }
+        } else {
+            array.push(undefined);
+        }
+    }
+
+    return array;
+}
+
+export { getTableFrom2DArray, roundDownFiveDecimals, jsonToArray };
