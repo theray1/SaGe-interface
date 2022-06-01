@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 
-const SlideBar = (props) => {
+const ProgressBar = (props) => {
   const backgroundColor = props.backgroundColor;
   const progressBarColor = props.progressBarColor;
   const progressValue = props.progressValue;
   const fontColor = props.fontColor;
 
-  //SlideBar does not have a dedicated css file, and its style attributes are declared here directly. That is because
-  //most of a slidebar's style attributes depend on its props. As such, it is more convenient to have them declared here.
+  //ProgressBar does not have a dedicated css file, and its style attributes are declared here directly. That is because
+  //most of a progress bar's style attributes depend on its props. As such, it is more convenient to have them declared here.
 
   const backgroundStyles = {
     width: "94%",
@@ -42,4 +42,4 @@ const SlideBar = (props) => {
   );
 };
 
-export default SlideBar;
+export default ProgressBar;

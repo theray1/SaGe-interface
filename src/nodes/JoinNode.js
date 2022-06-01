@@ -1,14 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
-import { getTableFrom2DArray } from "../util";
+import { dataToTable } from "../util";
+import NodeProgressBar from "../progressbars/NodeProgressBar";
 
 function JoinNode(props){
 
   const nodeData = props;
+  const coverage = 100 * nodeData.data.coverage;
 
+  /**
+   * Displays the current bag of mappings using dataToTable
+   * @returns A babel table containing the current bag of mappings of the node
+   */
   const cleanAttributeDisplay = () => {
-    return getTableFrom2DArray(nodeData.data.mucMap, "joinNodeMucMap");
+    return dataToTable(nodeData.data.mucMap, "joinNodeMucMap");
   } 
 
   const content = 
@@ -22,6 +28,9 @@ function JoinNode(props){
     </div>
     <div className="MainData">
       {cleanAttributeDisplay()}
+      <div id={"NodeProgressBarContainer" + nodeData.id} className="NodeProgressBarContainer">
+          <NodeProgressBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
+        </div>
     </div>
     <div className="DisplayData">
     </div>

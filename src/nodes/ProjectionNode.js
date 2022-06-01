@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Handle } from "react-flow-renderer";
 import ContainerNode from "./ContainerNode";
-import { getTableFromArray } from "../util";
+import NodeProgressBar from "../progressbars/NodeProgressBar";
 
 const ProjectionNode = (props) => {
 
 	const nodeData = props;
+  const coverage = 100 * nodeData.data.coverage;
 
+  /**
+   * Displays the node's projected variables
+   * @returns A babel table containing the projected variables
+   */
   const cleanAttributeDisplay = () => {
     return (
       nodeData.data.valuesList.map((value) => {
@@ -28,6 +33,11 @@ const ProjectionNode = (props) => {
       <div className="Handles">
         <Handle type='source' position="top"/>
         <Handle type='target' position="bottom"/>
+      </div>
+      <div className="MainData">
+        <div id={"NodeProgressBarContainer" + nodeData.id} className="NodeProgressBarContainer">
+          <NodeProgressBar backgroundColor={"#525252"} progressBarColor={"#80036d"} progressValue={coverage}/>
+        </div>
       </div>
       <div className="DisplayData">
         Projection sur les attributs: <br/>{cleanAttributeDisplay()}

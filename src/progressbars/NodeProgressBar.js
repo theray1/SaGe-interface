@@ -1,4 +1,4 @@
-import SlideBar from "./SlideBar";
+import ProgressBar from "./ProgressBar";
 
 function NodeProgressSlideBar(props){
 
@@ -9,7 +9,7 @@ function NodeProgressSlideBar(props){
 
 
   return (
-    <SlideBar
+    <ProgressBar
         backgroundColor={backgroundColor}
         progressBarColor={progressBarColor}
         fontColor={fontColor}

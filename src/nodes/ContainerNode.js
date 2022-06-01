@@ -1,5 +1,4 @@
-import React, { useCallback, useState } from "react";
-import { Handle } from "react-flow-renderer";
+import React from "react";
 import './ContainerNode.css';
 
 const ContainerNode = (props) => {
@@ -9,7 +8,7 @@ const ContainerNode = (props) => {
    * @param {*} node The focused HTML node 
    */
   const toggleNodeCollapse = (node) => {
-    const section = node.getElementsByClassName("ContainedNode")[0].getElementsByClassName("QueryNode")[0].getElementsByClassName("DisplayData")[0];
+    const section = node.getElementsByClassName("DisplayData")[0];
 
     const isExpanded = section.getAttribute('data-expanded') === 'true';
 
@@ -23,7 +22,6 @@ const ContainerNode = (props) => {
 
   }
 
-  //Shameless copy pasta from https://css-tricks.com/using-css-transitions-auto-dimensions/
   /**
    * Hides a section of a node
    * @param {*} element The section of the node to hide

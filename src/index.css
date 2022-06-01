@@ -25,6 +25,17 @@ button {
   height: 100vh;
 }
 
+.shadowedApp::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color:rgba(0,0,0,0.3);
+  content: " ";
+  pointer-events: none;
+}
+
 .Header {
   height: 21%;
   display: flex;
@@ -88,6 +99,7 @@ button {
   display: flex;
   flex-direction: row;
   flex: 1;
+  overflow: hidden;
 }
 
 .MainGraph {
@@ -101,6 +113,10 @@ button {
   width: 15%;
   overflow: hidden;
   resize: horizontal;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  -ms-flex-align: center;
 }
 
 .MetricsContent {
@@ -108,9 +124,16 @@ button {
   width: 60%;
   text-align: center;
   position: relative;
-  top: 50%;
-  transform: translateY(-50%) translateX(-50%);
+  transform: translateX(-50%);
   left: 50%;
+  padding-bottom: 20px;
+}
+
+.ResultsContainer {
+  max-height: 45%;
+  font-family: 'Courier New', Courier, monospace;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .QueryProgressBarContainer {

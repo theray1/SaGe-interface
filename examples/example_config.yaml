@@ -1,5 +1,5 @@
 name: SaGe Test server
-maintainer: Chuck Norris
+maintainer: Shi Zue
 quota: 75
 max_results: 2000
 graphs:
@@ -8,4 +8,4 @@ graphs:
   uri: http://example.org/bsbm
   description: DefinitelyAUsefulDescription
   backend: hdt-file
-  file: ../my-react-app/examples/bsbm1k.hdt
+  file: ../sage-interface/examples/bsbm1k.hdt

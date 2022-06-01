@@ -22,13 +22,12 @@ import ValuesNode from './nodes/ValuesNode';
 import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
 import { roundDownFiveDecimals } from './util';
-import QueryProgressSlideBar from './slidebars/QueryProgressSlideBar';
+import QueryProgressBar from './progressbars/QueryProgressBar';
 import YASQE from 'yasgui-yasqe';
 import "./yasqe.css";
 import StateManager from './stateManager';
-import {Buffer} from 'buffer';
-import { Message } from 'google-protobuf';
 
+//All the node types used by ReactFlow. Each one represents an operator used by SaGe 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
                     unionNode: UnionNode,
@@ -37,6 +36,16 @@ const nodeTypes = { projectionNode: ProjectionNode,
                     valuesNode: ValuesNode,
                     insertNode: InsertNode,
                     deleteNode: DeleteNode};
+
+let sparqlRequest = {
+  query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nSELECT ?s ?p ?o WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) }",
+  defaultGraph: "http://example.org/bsbm"
+};
+
+let sparqlServer = "http://localhost:8000/sparql";
+
+const nodeWidth = 600;
+const nodeHeight = 250;
 
 function App(){
 
@@ -47,14 +56,11 @@ function App(){
   //bsbm1k
   //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> SELECT ?s ?p ?o WHERE { ?s p2:date ?date . FILTER (?date > '2004-01-01'^^p1:date) }"
   //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> SELECT ?s ?p ?o WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) }",
+  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nPREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/>\nSELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }"
 
-  //Query management
-  let sparqlRequest = {
-    query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nPREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/>\nSELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }",
-    defaultGraph: "http://example.org/bsbm"
-  };
 
-  let sparqlServer = "http://localhost:8000/sparql";
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
 
   const [yasqe, setYasqe] = useState();
   
@@ -64,28 +70,16 @@ function App(){
 
   const [nextLink, setNextLink] = useState(null);
 
-  /*const [isQueryCommitable, setIsQueryCommitable] = useState(true);
-  const [isQueryResumeable, setIsQueryResumeable] = useState(false);
-  const [isAutoRunOn, setIsAutoRunOn] = useState(false);*/
-
-  var proto = require('./iterators_pb');
-
-  const nodeWidth = 600;
-  const nodeHeight = 250;
+  const [results, setResults] = useState([]);
   
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-  var [nodes, setNodes, onNodesChange] = useNodesState([]);// Declaring nodes with var allows to force update the nodes variable without using setNodes, which is useful since while setNodes guarantees sync with render, it also sometimes delays the actual updating of the variable. 
+  const [nodes, setNodes, onNodesChange] = useNodesState([]); 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [leaves, setLeaves] = useState([]);
 
   const [exportMetric, setExportMetric] = useState("");
   const [importMetric, setImportMetric] = useState("");
-  const [cardinalityMetric, setCardinalityMetric] = useState("");
   const [costMetric, setCostMetric] = useState("");
   const [coverageMetric, setCoverageMetric] = useState("");
-  const [progressionMetric, setProgressionMetric] = useState("");
     
   //componentDidMount equivalent. It is used to create the yasqe editor and the state manager once and only once, when the page is loaded
   useEffect(() => {
@@ -108,10 +102,8 @@ function App(){
   const updateStats = (queryStats) => {
     setExportMetric(queryStats["export"]);
     setImportMetric(queryStats["import"]);
-    setCardinalityMetric(queryStats["metrics"]["cardinality"]);
     setCostMetric(queryStats["metrics"]["cost"]);
     setCoverageMetric(queryStats["metrics"]["coverage"]);
-    setProgressionMetric(queryStats["metrics"]["progression"]);
   }
 
   /**
@@ -120,20 +112,15 @@ function App(){
   const resetStats = () => {
     setExportMetric(0);
     setImportMetric(0);
-    setCardinalityMetric(0);
     setCostMetric(0);
     setCoverageMetric(0);
-    setProgressionMetric(0);
   }
-
 
   const stats={
    exportMetric: exportMetric,
    importMetric: importMetric,
-   cardinalityMetric: cardinalityMetric,
    costMetric: costMetric,
    coverageMetric: coverageMetric,
-   progressionMetric: progressionMetric, 
   }
 
   //-----------------------------------------------------------------------------------GRAPH MANAGEMENT-------------------------------------------------------------------------------------------------------
@@ -180,6 +167,11 @@ function App(){
     return { nodes, edges };
   };
 
+  /**
+   * Checks if a JSON object is a node 
+   * @param {*} element The JSON representation of a node, as used by React Flow
+   * @returns True if the element has a position attribute, false otherwise
+   */
   const isNode = (element) => {
     //This condition verifies that element is a node, since all nodes always have a position but edges never do
     return element.position !== undefined;
@@ -218,12 +210,6 @@ function App(){
 
     //Sets the nodes of newGraph as the nodes of the current graph
     setNodes(newNodes);
-
-
-    //setNodes does not instantly modifies the value of the nodes hook; this is a problem for the auto run and only using setNodes will cause the graph to be properly
-    //laid out only for the first quantum. The only fix I could find was to manually modify the nodes hook.
-    //This is not the intented way to use hooks and this probably shouldn't be done this way.
-    nodes = newNodes;
   }
 
   /**
@@ -281,8 +267,14 @@ function App(){
    
   }
 
+
   //-----------------------------------------------------------------------------------QUERY MANAGEMENT-------------------------------------------------------------------------------------------------------
 
+  /**
+   * Auxiliary function used by commitQuery(). Creates a HTML request with a query as its body and sends it to the SaGe server.
+   * @param {*} query The query to be commited
+   * @returns The promise generated from sending a query to the SaGe server
+   */
   const __commitQuery = (query) => {
     let fetchData = {
       method: 'POST',
@@ -298,18 +290,27 @@ function App(){
     return promise;
   }
 
+  /**
+   * Auxiliary function used by commitQuery(). Deals with the response generated from sending a query to the SaGe server
+   * @param {*} promise 
+   * @returns The promise generated from sending a query to the SaGe server and then updating the interface accordingly
+   */
   const __responseCommitQuery = (promise) => {
 
     let returnPromise = promise
     .then(res => res.json())
     .then(data => {
 
+      console.log(data);
+      console.log(nextLink_to_jsonPlan(data["next"]));
+
       if(data["hasNext"]){
 
         let graphElements = nextLink_to_graph(data["next"]);
-        createGraph(graphElements/*["graphElements"]*/);
-        //setLeaves(graphElements["leaves"]);
-        
+        createGraph(graphElements["graphElements"]);
+        setLeaves(graphElements["leaves"]);
+        setResults(results.concat(data["bindings"]));
+
 
       } else {
 
@@ -331,81 +332,13 @@ function App(){
 
   /**
    * Starts the processing of a query by sending it to SaGe server and creating a graph according to the response's nextLink
-   * @returns A promise of response from the query sent to the SaGe server
+   * @returns The promise generated from sending a query to the SaGe server and then updating the interface accordingly
    */
   const commitQuery = (query) => {
 
     var promise = __commitQuery(query);
     return __responseCommitQuery(promise);
 
-  }
-
-  const __fetchNext = () => {
-    
-    const queryTemp = JSON.parse(query);
-    queryTemp["next"] = nextLink;
-
-    let fetchInstructions = {
-      method: 'POST',
-      body: JSON.stringify(queryTemp),
-      headers: {
-        "Content-type": "application/json",
-        "accept": "application/json"
-      }
-    }
-
-    let promise = fetch(sparqlServer, fetchInstructions)
-
-    return promise;
-  }
-
-  const __responseFetchNext = (promise) => {
-
-    let returnPromise = promise
-    .then(res => res.json())
-    .then(data => {
-
-      if(data["hasNext"]) {//query isn't over
-      
-        let graphElements = nextLink_to_graph(data["next"]);
-        updateGraph(graphElements/*["graphElements"]*/);
-        //setLeaves(graphElements["leaves"]);
-
-      }else {//query is over
-
-        stateManager.setState("postQueryEnd");
-
-      }
-
-      updateStats(data["stats"]);
-      setNextLink(data["next"]);
-
-      return data;
-    })
-    .catch((error) => {console.log(error)});
-
-    return returnPromise;
-
-  }
-
-  /**
-   * Sends the next part of the ongoing query to the SaGe server
-   * @returns A promise of response from the query sent to the SaGe server 
-   */
-  const fetchNext = () => {
-
-    var promise = __fetchNext()
-    return __responseFetchNext(promise);
-
-  }
-
-
-  /**
-   * Sends the next part of the ongoing query as long as the last response had a non null nextLink
-   */
-  function resumeAutoRun(){
-    stateManager.setState("autoRun");
-    fetchNext();
   }
 
   /**
@@ -428,6 +361,10 @@ function App(){
     return yasqe.getValue();
   }
 
+  /**
+   * Creates a request and sends it to the server
+   * @returns The promise generated from sending a query to the SaGe server and then updating the interface accordingly
+   */
   const commitFirstQuantum = () => {
     var q = createRequest(getQueryInput());
     setQuery(q);
@@ -435,16 +372,180 @@ function App(){
     return promise;
   }
 
-  //-----------------------------------------------------------------------------QUERY MODIFICATION-----------------------------------------------------------------------------------------------------------
+  //Sending next links
+
+  /**
+   * Auxiliary function used by fetchNext(). Deals with the response generated from sending a next link to the server
+   * @param {*} promise The promise generated from sending a next link to the SaGe server
+   * @returns The promise generated from sending a query with a next link to the SaGe server and then updating the interface accordingly
+   */
+  const __responseFetchNext = (promise) => {
+
+    let returnPromise = promise
+    .then(res => res.json())
+    .then(data => {
+
+      if(data["hasNext"]) {//query isn't over
+      
+        let graphElements = nextLink_to_graph(data["next"]);
+        updateGraph(graphElements["graphElements"]);
+        setLeaves(graphElements["leaves"]);
+        setResults(results.concat(data["bindings"]));
+
+      }else {//query is over
+        console.log(data);
+        stateManager.setState("postQueryEnd");
+
+      }
+
+      updateStats(data["stats"]);
+      setNextLink(data["next"]);
+
+      return data;
+    })
+    .catch((error) => {console.log(error)});
+
+    return returnPromise;
+
+  }
+
+  /**
+   * Auxiliary function used by fethNext(). Creates a HTML request with an updated next link and sends it to the SaGe server
+   * @returns The promise generated from sending a query with a next link to the SaGe server
+   */
+  const __fetchNext = () => {
+    
+    const parsedQuery = JSON.parse(query);
+    parsedQuery["next"] = nextLink;
+  
+    let fetchInstructions = {
+      method: 'POST',
+      body: JSON.stringify(parsedQuery),
+      headers: {
+        "Content-type": "application/json",
+        "accept": "application/json"
+      }
+    }
+  
+    let promise = fetch(sparqlServer, fetchInstructions)
+
+    return promise;
+  }
+  
+
+  /**
+   * Sends the next part of the ongoing query to the SaGe server
+   * @returns The promise generated from sending a query with a next link to the SaGe server and then updating the interface accordingly
+   */
+  const fetchNext = () => {
+
+    var promise = __fetchNext()
+    return __responseFetchNext(promise);
+
+  }
+
+  //Auto-run
+
+  /**
+   * Sends the next part of the ongoing query as long as the last response had a non null nextLink
+   */
+  const resumeAutoRun = () => {
+    stateManager.setState("autoRun");
+    fetchNext();
+  }
 
   
+  //-----------------------------------------------------------------------------QUERY MODIFICATION-----------------------------------------------------------------------------------------------------------
+
+  /**
+   * Finds the path required to go from the root of the execution plan to a node
+   * @param {*} id The id of the destination node 
+   * @returns An array of operator names, in the order they are met when going from the root of the execution plan to the destionation node 
+   */
+  const findCorrespondingPath = (id) => {
+    for(var leafIndex in leaves){
+      if(leaves[leafIndex].id.toString() === id){
+        return leaves[leafIndex].path;
+      }
+    }
+
+    //No leaf was found for the given id.
+    return [];
+  }
+
+  /**
+   * Auxiliary function used by offSetNode(). Modifies the lastRead attribute of a scan node and resets currents mappings of the join operators on the path between the root of the execution plan and the scan node
+   * @param {*} id The id of the node to be modified
+   * @param {*} value The new value to be given to the lastRead attribute
+   */
+  const __offSetNode = (id, value) => {
+    var plan = nextLink_to_jsonPlan(nextLink);
+    var current = plan;
+
+    var path = findCorrespondingPath(id);
+
+    for(var ite in path){
+      current = current[path[ite]];
+
+      if(path[ite] === "joinSource" || path[ite] === "joinRight" || path[ite] === "joinLeft"){
+        current["mucMap"] = [];
+      }
+    }
+
+    current["lastRead"] = value;
+
+    var newLink = jsonPlan_to_nextLink(plan)
+    setNextLink(newLink);
+  }
+
+  /**
+   * Allows the user to modify the lastRead attribute of one the scan operators of the plan 
+   * @param {*} targetNode The node representing the scan operator to modify
+   */
+  const offSetNode = (targetNode) => {
+    var plan = nextLink_to_jsonPlan(nextLink);
+    var current = plan;
+
+    var path = findCorrespondingPath(targetNode.getAttribute("id"));
+
+    for(var ite in path){
+      current = current[path[ite]];
+    }
+    
+    var currentLastRead = current["lastRead"];
+
+    var value = window.prompt("Last Triple Read : " + currentLastRead, 0);
+
+    var parsedValue = parseInt(value);
+
+    if(Number.isInteger(parsedValue)/*value is a number*/ && parsedValue > 0 /*value is not incoherent (greater than 0 and lesser than there are triple patter to scan)*/){
+      __offSetNode(targetNode.getAttribute("id"), value);
+    }
+  }
+
+  /**
+   * Checks if an element is an HTML element representing a Scan Operator Node
+   * @param {*} element The element to be checked
+   * @returns True if the id attribute of the element isn't null and the id attribute of the element belongs to the leaves, false otherwise
+   */
+  const isScanNode = (element) => {
+    for(var leaf in leaves){
+      var id = element.getAttribute("id");
+      if(id !== null && leaves[leaf].id.toString() === id.toString()){
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   //-----------------------------------------------------------------------------BUTTON INPUT HANDLING--------------------------------------------------------------------------------------------------------
 
   const handleCommitQueryClick = () => { 
     if(stateManager.canCommit()){
-      stateManager.setState("betweenSteps");
-      commitFirstQuantum();
+      commitFirstQuantum().then(() => {
+        stateManager.setState("betweenSteps");
+      });
     }
     
   }
@@ -475,88 +576,47 @@ function App(){
     createGraph(nodes.concat(edges));
   }
 
-  
-  
+  const handleGraphClick = (e) => {
 
-  const handleDebugClick = () => {
+    var target = e.target;
 
-    let jsonPlan = nextLink_to_jsonPlan(nextLink);
+    if(isScanNode(target) && stateManager.canOffSet()){
+      offSetNode(target);
+    };
+  }
 
-    console.log(jsonPlan);
+  const toggleOffSetMode = () => {
 
-    setNextLink(jsonPlan_to_nextLink(jsonPlan));
+    var allNodes = document.getElementsByClassName("ContainerNode");
 
-
-
-    // nextLink -- (Buffer.from(nextLink, 'base64')) -> bufferedPlan -- (proto.RootTree.DeserializeBinary(newUint8Array(bufferedPlan))) -> protoPlan -- (protoPlan.toObject()) -> objectJsonPlan
-    // unbufferedPlan <- (bufferedPlan.toString('base64)) -- protoPlan <- ()
-
-    /*var bufferedPlan = Buffer.from(nextLink, 'base64');
-
-    console.log("nextLink: ", nextLink);
-    console.log("bufferedPlan: ", bufferedPlan);
-
-    var unbufferedPlan = bufferedPlan.toString('base64');
-
-    console.log("unbufferedPlan: ", unbufferedPlan);
-
-    console.log(unbufferedPlan === nextLink);
-
-    var protoPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan))
-
-    var seralizedJsonPlan = protoPlan.serializeBinary();
-
-    var objectJsonPlan = protoPlan.toObject();
-
-    console.log("protoPlan: ", protoPlan);
-
-    console.log("serializedJsonPlan: ", seralizedJsonPlan);
-
-    console.log("objectJsonPlan: ", objectJsonPlan);*/
-
-    /*console.log(edges);
-
-    console.log("nextLink1: ", nextLink);
-
-    var bufferedNextLink1 = Buffer.from(nextLink, 'base64');
-
-    console.log("bufferedNextLink1: ", bufferedNextLink1);
-
-    var protoPlan1 = proto.RootTree.deserializeBinary(new Uint8Array(bufferedNextLink1));
-
-    console.log("protoPlan1: ", protoPlan1);
-
-    var jsonPlan1 = protoPlan1.toObject();
-
-    console.log(jsonPlan1);
-
-    var maybe = jsonPlan_to_nextLink(jsonPlan1);
-
-    console.log("this should be next link: ", maybe);
-    console.log("this is nextLink: ", nextLink);
-
-    console.log(maybe === nextLink);*/
-/*
-    console.log("jsonPlan1: ", jsonPlan1);
+    if(stateManager.canEnterOffSetMode()){
     
-    var jsonPlan2 = JSON.parse(JSON.stringify(jsonPlan1));
+      stateManager.setState("offSet");
 
-    console.log("jsonPlan2: ", jsonPlan2);
+      document.getElementById("root").classList.add("shadowedApp");
 
-    var protoPlan2 = protoPlan1; //WHAT IS THE TRANSITION TO USE HERE INSTEAD OF protoPlan1
+      for(var i = 0; i < allNodes.length; i++){
 
-    console.log("protoPlan2: ", protoPlan2);
+        if(!isScanNode(allNodes[i])) allNodes[i].classList.add("shadowedNode");
 
-    var bufferedNextLink2 = Buffer.from(protoPlan2.serializeBinary());
-    //var bufferedNextLink2 = bufferedNextLink1;
+      }
+    
+    } else {
 
-    console.log("bufferedNextLink2: ", bufferedNextLink2);
+      if(stateManager.canLeaveOffSetMode()){
+    
+        stateManager.setState("betweenSteps");
+    
+        document.getElementById("root").classList.remove("shadowedApp");
 
-    var nextLink2 = bufferedNextLink2.toString('base64');
+        for(var j = 0; j < allNodes.length; j++){
 
-    console.log("nextLink2: ", nextLink2);
-
-*/
+          allNodes[j].classList.remove("shadowedNode");
+          
+        }
+      } 
+    
+    }
   }
 
   return(
@@ -573,7 +633,7 @@ function App(){
             </li>
           </ul>
           <div className="About">
-            Thanks to: LS2N, Hala Skaf-Molli, Pascal Molli, Julien, Wang and Vincent. 
+            Thanks to: LS2N, Hala Skaf-Molli, Pascal Molli, Julien, Hoang, Vincent, and the googley eyed plant I watered during my stay. 
             <br/>Author : Erwan Boisteau-Desdevises
           </div>
         </div>
@@ -590,13 +650,13 @@ function App(){
             <tbody>
               <tr className="ButtonsTable1">
                 <th><button id="commitQueryButton" onClick={() => handleCommitQueryClick()}>Commit Query</button></th>
-                <th><button id="resumeQueryButton" onClick={() => handleResumeClick()}>Next Quantum</button></th>
                 <th><button id="commitQueryAndStartAutoRunButton" onClick={() => handleAutoRunClick()}>Auto-Run Query</button></th>
+                <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
               </tr>
               <tr className="ButtonsTables2">
+              <th><button id="resumeQueryButton" onClick={() => handleResumeClick()}>Next Quantum</button></th>
                 <th><button id='stopAutoRun' onClick={() => handleStopAutoRunClick()}>Stop Auto-Run</button></th>
-                <th><button id='debugButton' onClick={() => {handleDebugClick()}}>Debug Button</button></th>
-                <th><button id='layoutButton' onClick={() => handleLayoutClick()}>Re-Layout Graph</button></th>
+                <th><button id='modeButton' onClick={() => toggleOffSetMode()}>Toggle Offset Mode</button></th>
               </tr>
             </tbody>
           </table>
@@ -611,18 +671,20 @@ function App(){
         
         <div className="Metrics">
           <div className="MetricsContent">
+          
             Export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
             Import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
-            Cardinality:<br/>{roundDownFiveDecimals(stats.cardinalityMetric)}<br/><br/>
             Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
-            Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/><br/>
-            Progression:<br/>
+            Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/>
             <div id="QueryProgressBarContainer" className="QueryProgressBarContainer">
-              <QueryProgressSlideBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.progressionMetric*100}/>
+              <QueryProgressBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.coverageMetric*100}/>
             </div>
-              
           </div>
-        </div>      
+          
+          <div className="ResultsContainer">
+            
+          </div>
+        </div>    
         <div className="MainGraph">
           <ReactFlow
             nodes={nodes} 
@@ -631,9 +693,10 @@ function App(){
             onNodesChange={onNodesChange} 
             fitView
             minZoom={0.1} 
-            maxZoom={5}>
+            maxZoom={5}
+            onClick={(e) => {handleGraphClick(e)}}>
               <Controls/>
-            </ReactFlow>
+          </ReactFlow>
         </div>
       </div>
     </div>

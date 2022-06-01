@@ -11,13 +11,21 @@
 
     width: 350px;
     min-height: 150px;
-    max-height: 300px;
+    max-height: 400px;
     height: fit-content;
-    
-    /*transform: translateX(20%);*/
 
     transition: font-size 0.4s, width 0.5s;
 }
+
+.shadowedNode::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color:rgba(0,0,0,0.3);
+    content: " ";
+  }
 
 .ContainerNodeFocused {
     border: 5px solid rebeccapurple;
@@ -33,7 +41,7 @@
     font-size: 190%;
 }
 
-.ContainedNode {
+.ContainedNode{
     text-align: left;
     pointer-events: none;
     height: 100%;
@@ -52,7 +60,6 @@
 }
 
 .Label {
-    pointer-events: none;
     font-size: 200%;
     text-align: center;
 }

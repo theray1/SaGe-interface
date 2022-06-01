@@ -1,13 +1,12 @@
 //This class is used to restreint user input. This prevents mistakes and inconsistent display of the progression of the query
 export default class StateManager {
 
-
-    //Possible states : preQuery, midQuery, waitForResponse, midAutoRun, postQuery
     #state;
+
+    possibleStates = ["preQuery", "midQuery", "postQueryEnd", "betweenSteps", "autoRun", "offSet"];
 
     constructor(){
         this.#state = "preCommit";
-
     }
 
     getState(){
@@ -15,7 +14,7 @@ export default class StateManager {
     }
 
     setState(newState){
-        this.#state = newState;
+        if(this.possibleStates.includes(newState)) this.#state = newState;
     }
 
     canCommit(){
@@ -34,8 +33,16 @@ export default class StateManager {
         return this.#state === "autoRun";
     }
 
-    canOffSetNext(){
-        return this.#state = "betweenSteps";
+    canEnterOffSetMode(){
+        return this.#state === "betweenSteps";
+    }
+
+    canLeaveOffSetMode(){
+        return this.#state === "offSet";
+    }
+
+    canOffSet(){
+        return this.#state === "offSet";
     }
 
     isAutoRunOn(){

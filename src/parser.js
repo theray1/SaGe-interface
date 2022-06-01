@@ -1,5 +1,4 @@
 import {Buffer} from 'buffer';
-import { Message } from 'google-protobuf';
 import { MarkerType } from 'react-flow-renderer';
 import { jsonToArray } from './util';
 
@@ -34,11 +33,12 @@ const leaf = ['scanLeft', 'scanRight', 'scanSource'];
  * @param {*} id The id of the created node 
  * @returns A JSON object representing a node for a react flow graph
  */
-const node_factory = (obj, key, id) => {
+const node_factory = (obj, key, id, path) => {
   var node = {
     id: id.toString(),
     type: 'default',
     position: {x: 0, y: 0},
+    path: path,
     data: {},
   };
 
@@ -46,52 +46,65 @@ const node_factory = (obj, key, id) => {
     node.type = 'projectionNode';
     node.data = {
       label: 'Projection',
-      valuesList: obj[key].valuesList
+      valuesList: obj[key].valuesList,
+      coverage: obj[key].coverage,
+      cost: obj[key].cost,
     };
   }
   else if(key === 'joinSource' || key === 'joinLeft' || key === 'joinRight'){//Join
     node.type = 'joinNode';
     node.data = {
       label: 'Join',
-      mucMap: obj[key].mucMap
+      mucMap: obj[key].mucMap,
+      coverage: obj[key].coverage,
+      cost: obj[key].cost,
     };  
   }
   else if(key === 'unionSource' || key === 'unionLeft' || key === 'unionRight'){//Union
     node.type = 'unionNode';
     node.data = {
       label: 'Union',
+      coverage: obj[key].coverage,
+      cost: obj[key].cost,
     };
   }
   else if(key === 'filterSource' || key === 'filterLeft' || key === 'filterRight'){//Filter
     node.type = 'filterNode';
     node.data = {
       label: 'Filter',
+      consumed: obj[key].consumed,
+      cost: obj[key].cost,
+      coverage: obj[key].coverage,
       expression: obj[key].expression,
       muMap: obj[key].muMap,
-      consumed: obj[key].consumed,
-      produced: obj[key].produced
+      produced: obj[key].produced,
+      variablesList: obj[key].variablesList,
     };
   }
   else if(key === 'scanSource' || key === 'scanLeft' || key === 'scanRight'){//Scan
     node.type = 'scanNode';
     node.data = {
       label: 'Scan',
-      cardinality: obj[key].cardinality, //le nombre de patternes pour une instance
+      cost: obj[key].cost,
+      coverage: obj[key].coverage,
       cumulativeCardinality: obj[key].cumulativeCardinality,
-      patternCardinality: obj[key].patternCardinality, //le nombre de patternes pour toutes les instances cumulées
+      cumulativeProduced: obj[key].cumulativeProduced,
       lastRead: obj[key].lastRead,
       muMap: obj[key].muMap,
       mucMap: obj[key].mucMap,
       pattern: obj[key].pattern,
-      patternProduced: obj[key].patternProduced, //le nombre de patternes produits lors d'une recherche pour toutes les instances
-      produced: obj[key].produced, //le nombres patternes produits lors d'une recherche pour une instance
-      stages: obj[key].stages
+      produced: obj[key].produced,
+      stages: obj[key].stages,
     };
   }
   else if(key === 'valuesSource' || key === 'valuesLeft' || key === 'valuesRight'){//Values
     node.type = 'valuesNode';
     node.data = {
       label: 'Values',
+      cost: obj[key].cost,
+      coverage: obj[key].coverage,
+      mucMap: obj[key].mucMap,
+      produced: obj[key].produced,
     }
   }
   else if(key === 'insertSource' || key === 'insertLeft' || key === 'insertRight'){//Insert
@@ -121,28 +134,31 @@ const node_factory = (obj, key, id) => {
 const plan_request_to_graph = (obj) => {
   var nodes = [];
   var edges = [];
-  var queue = [[obj, null]];
-  //var leaves = [];
+  var queue = [[obj, null, []]];
+  var leaves = [];
   var id = 0;
 
   while (queue.length > 0){
-    var [currentNode, parentId] = queue.shift();
-
-    /*if(is_leaf(currentNode)){
-      leaves.push({
-        currentNode: currentNode,
-        id: id
-      })
-    }*/
+    var [currentNode, parentId, path] = queue.shift();
     
     for (var key in currentNode){
+
       if (currentNode[key] !== undefined && (is_node(key))){
 
-        var newNode = node_factory(currentNode, key, id);
+        var currentPath = path.slice();
+        currentPath.push(key);
 
+        if(is_leaf(key)){
+          leaves.push({
+            path: currentPath,
+            id: id
+          })
+        }
+
+        queue.push([currentNode[key], id, currentPath]);
+
+        var newNode = node_factory(currentNode, key, id, currentPath);
         nodes.push(newNode);
-
-        queue.push([currentNode[key], id]);
 
         if(parentId !== null){
           edges.push({
@@ -169,12 +185,10 @@ const plan_request_to_graph = (obj) => {
   }
 
 
-  return nodes.concat(edges);
-
-  /*return {
+  return {
     graphElements: nodes.concat(edges),
     leaves: leaves
-  }*/
+  }
     
 }
 
@@ -191,6 +205,11 @@ export function nextLink_to_graph(nextLink) {
   return graph;
 } 
 
+/**
+ * Transates a next link into a JSON object representing the execution plan contained in the next link
+ * @param {*} nextLink The net link to be decoded
+ * @returns The JSON object representing the execution plan corresponding to the next link
+ */
 export function nextLink_to_jsonPlan(nextLink) {
   var bufferedPlan = Buffer.from(nextLink, 'base64');
 
@@ -199,6 +218,11 @@ export function nextLink_to_jsonPlan(nextLink) {
   return jsonPlan;
 }
 
+/**
+ * Encodes a JSON object representing an execution plan into a usable next link
+ * @param {*} jsonPlan The JSON object to be encoded
+ * @returns The next link corresponding to the execution plan
+ */
 export function jsonPlan_to_nextLink(jsonPlan) {
 
   var content = jsonToArray(jsonPlan);

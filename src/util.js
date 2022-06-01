@@ -31,8 +31,8 @@ const __createCells = (data) => {
 }
 
 /**
- * Used by getTableFrom2DArray. Creates the rows of the table
- * @param {*} data The data to be translated, an rray composed of 2-element arrays
+ * Used by dataToTable. Creates the rows of the table
+ * @param {*} data An array composed of 2-element arrays
  * @returns An array of table rows, each containing the data of a 2-element array
  */
 const __createRows = (data) => {
@@ -45,11 +45,11 @@ const __createRows = (data) => {
 
 /**
  * Transforms an array of 2-element arrays into a babel table
- * @param {*} data The data to be translated, an array composed of 2-element arrays
+ * @param {*} data An array composed of 2-element arrays
  * @param {*} className The class name given to the resulting table
  * @returns A table of two columns and as many rows as they were arrays in fata
  */
-const getTableFrom2DArray = (data, className) => {
+const dataToTable = (data, className) => {
     return (
         <table className={className}>
             <tbody>
@@ -59,8 +59,12 @@ const getTableFrom2DArray = (data, className) => {
     )
 }
 
-
 //unsure if this works perfectly, but sage does seem to accept it the way it is, like everyone should <3
+/**
+ * Transforms a composite JSON object into a similar array.
+ * @param {*} json The JSON object to be tranformed
+ * @returns An array containing the same data as the JSON object
+ */
 const jsonToArray = (json) => {
     var array = [];
 
@@ -79,4 +83,45 @@ const jsonToArray = (json) => {
     return array;
 }
 
-export { getTableFrom2DArray, roundDownFiveDecimals, jsonToArray };
+
+const displayElement = (element, key) => {
+    return (
+        <div key={element[0].toString()+key.toString()} className="triplePatternElement">
+            {element[0]}: {element[1]}
+            <br/>
+        </div>
+    )
+}
+
+const displayTriplePattern = (triplePattern, key) => {
+
+    var triplePatternArray = [];
+
+    for(var ite in triplePattern){
+        triplePatternArray.push([ite,triplePattern[ite]]);
+    }
+
+    return(
+        <div key={key} className="triplePattern">
+            {triplePatternArray.map((element) => {
+                return displayElement(element, key); 
+            })}
+            <br/><br/>
+        </div>
+        
+    ) 
+
+}
+
+const displayResults = (results) => {
+
+    var key = 0;
+
+    return results.map((triplePattern) => {
+        key++;
+
+        return displayTriplePattern(triplePattern, key);
+    })
+}
+
+export { dataToTable, roundDownFiveDecimals, jsonToArray };

@@ -7,7 +7,7 @@
  * @public
  */
 // GENERATED CODE -- DO NOT EDIT!
-/*eslint-disable*/
+/* eslint-disable */
 
 var jspb = require('google-protobuf');
 var goog = jspb;
@@ -189,7 +189,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.iterators.SavedFilterIterator = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.iterators.SavedFilterIterator.oneofGroups_);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.iterators.SavedFilterIterator.repeatedFields_, proto.iterators.SavedFilterIterator.oneofGroups_);
 };
 goog.inherits(proto.iterators.SavedFilterIterator, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -652,12 +652,12 @@ proto.iterators.SavedScanIterator.toObject = function(includeInstance, msg) {
     muMap: (f = msg.getMuMap()) ? f.toObject(includeInstance, undefined) : [],
     lastRead: jspb.Message.getFieldWithDefault(msg, 4, ""),
     timestamp: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    cardinality: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    cumulativeCardinality: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    patternCardinality: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    patternProduced: jspb.Message.getFieldWithDefault(msg, 9, 0),
-    produced: jspb.Message.getFieldWithDefault(msg, 10, 0),
-    stages: jspb.Message.getFieldWithDefault(msg, 11, 0)
+    produced: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    cumulativeProduced: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    cumulativeCardinality: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    stages: jspb.Message.getFieldWithDefault(msg, 11, 0),
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0)
   };
 
   if (includeInstance) {
@@ -721,27 +721,27 @@ proto.iterators.SavedScanIterator.deserializeBinaryFromReader = function(msg, re
       break;
     case 6:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setCardinality(value);
+      msg.setProduced(value);
       break;
     case 7:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setCumulativeCardinality(value);
+      msg.setCumulativeProduced(value);
       break;
     case 8:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setPatternCardinality(value);
-      break;
-    case 9:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setPatternProduced(value);
-      break;
-    case 10:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setProduced(value);
+      msg.setCumulativeCardinality(value);
       break;
     case 11:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setStages(value);
+      break;
+    case 12:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 13:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -802,38 +802,24 @@ proto.iterators.SavedScanIterator.serializeBinaryToWriter = function(message, wr
       f
     );
   }
-  f = message.getCardinality();
+  f = message.getProduced();
   if (f !== 0) {
     writer.writeInt64(
       6,
       f
     );
   }
-  f = message.getCumulativeCardinality();
+  f = message.getCumulativeProduced();
   if (f !== 0) {
     writer.writeInt64(
       7,
       f
     );
   }
-  f = message.getPatternCardinality();
+  f = message.getCumulativeCardinality();
   if (f !== 0) {
     writer.writeInt64(
       8,
-      f
-    );
-  }
-  f = message.getPatternProduced();
-  if (f !== 0) {
-    writer.writeInt64(
-      9,
-      f
-    );
-  }
-  f = message.getProduced();
-  if (f !== 0) {
-    writer.writeInt64(
-      10,
       f
     );
   }
@@ -841,6 +827,20 @@ proto.iterators.SavedScanIterator.serializeBinaryToWriter = function(message, wr
   if (f !== 0) {
     writer.writeInt64(
       11,
+      f
+    );
+  }
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      12,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      13,
       f
     );
   }
@@ -965,10 +965,10 @@ proto.iterators.SavedScanIterator.prototype.setTimestamp = function(value) {
 
 
 /**
- * optional int64 cardinality = 6;
+ * optional int64 produced = 6;
  * @return {number}
  */
-proto.iterators.SavedScanIterator.prototype.getCardinality = function() {
+proto.iterators.SavedScanIterator.prototype.getProduced = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
 };
 
@@ -977,16 +977,16 @@ proto.iterators.SavedScanIterator.prototype.getCardinality = function() {
  * @param {number} value
  * @return {!proto.iterators.SavedScanIterator} returns this
  */
-proto.iterators.SavedScanIterator.prototype.setCardinality = function(value) {
+proto.iterators.SavedScanIterator.prototype.setProduced = function(value) {
   return jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
 /**
- * optional int64 cumulative_cardinality = 7;
+ * optional int64 cumulative_produced = 7;
  * @return {number}
  */
-proto.iterators.SavedScanIterator.prototype.getCumulativeCardinality = function() {
+proto.iterators.SavedScanIterator.prototype.getCumulativeProduced = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
@@ -995,16 +995,16 @@ proto.iterators.SavedScanIterator.prototype.getCumulativeCardinality = function(
  * @param {number} value
  * @return {!proto.iterators.SavedScanIterator} returns this
  */
-proto.iterators.SavedScanIterator.prototype.setCumulativeCardinality = function(value) {
+proto.iterators.SavedScanIterator.prototype.setCumulativeProduced = function(value) {
   return jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
- * optional int64 pattern_cardinality = 8;
+ * optional int64 cumulative_cardinality = 8;
  * @return {number}
  */
-proto.iterators.SavedScanIterator.prototype.getPatternCardinality = function() {
+proto.iterators.SavedScanIterator.prototype.getCumulativeCardinality = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
@@ -1013,44 +1013,8 @@ proto.iterators.SavedScanIterator.prototype.getPatternCardinality = function() {
  * @param {number} value
  * @return {!proto.iterators.SavedScanIterator} returns this
  */
-proto.iterators.SavedScanIterator.prototype.setPatternCardinality = function(value) {
+proto.iterators.SavedScanIterator.prototype.setCumulativeCardinality = function(value) {
   return jspb.Message.setProto3IntField(this, 8, value);
-};
-
-
-/**
- * optional int64 pattern_produced = 9;
- * @return {number}
- */
-proto.iterators.SavedScanIterator.prototype.getPatternProduced = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.iterators.SavedScanIterator} returns this
- */
-proto.iterators.SavedScanIterator.prototype.setPatternProduced = function(value) {
-  return jspb.Message.setProto3IntField(this, 9, value);
-};
-
-
-/**
- * optional int64 produced = 10;
- * @return {number}
- */
-proto.iterators.SavedScanIterator.prototype.getProduced = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.iterators.SavedScanIterator} returns this
- */
-proto.iterators.SavedScanIterator.prototype.setProduced = function(value) {
-  return jspb.Message.setProto3IntField(this, 10, value);
 };
 
 
@@ -1069,6 +1033,42 @@ proto.iterators.SavedScanIterator.prototype.getStages = function() {
  */
 proto.iterators.SavedScanIterator.prototype.setStages = function(value) {
   return jspb.Message.setProto3IntField(this, 11, value);
+};
+
+
+/**
+ * optional float coverage = 12;
+ * @return {number}
+ */
+proto.iterators.SavedScanIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 12, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedScanIterator} returns this
+ */
+proto.iterators.SavedScanIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 12, value);
+};
+
+
+/**
+ * optional float cost = 13;
+ * @return {number}
+ */
+proto.iterators.SavedScanIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 13, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedScanIterator} returns this
+ */
+proto.iterators.SavedScanIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 13, value);
 };
 
 
@@ -1114,8 +1114,10 @@ proto.iterators.SavedValuesIterator.toObject = function(includeInstance, msg) {
     valuesList: jspb.Message.toObjectList(msg.getValuesList(),
     proto.iterators.SolutionMapping.toObject, includeInstance),
     nextValue: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    produced: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    mucMap: (f = msg.getMucMap()) ? f.toObject(includeInstance, undefined) : []
+    mucMap: (f = msg.getMucMap()) ? f.toObject(includeInstance, undefined) : [],
+    produced: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 5, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0)
   };
 
   if (includeInstance) {
@@ -1162,14 +1164,22 @@ proto.iterators.SavedValuesIterator.deserializeBinaryFromReader = function(msg, 
       msg.setNextValue(value);
       break;
     case 3:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setProduced(value);
-      break;
-    case 4:
       var value = msg.getMucMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setProduced(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 6:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -1215,16 +1225,30 @@ proto.iterators.SavedValuesIterator.serializeBinaryToWriter = function(message, 
       f
     );
   }
+  f = message.getMucMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getProduced();
   if (f !== 0) {
     writer.writeInt64(
-      3,
+      4,
       f
     );
   }
-  f = message.getMucMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      5,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      6,
+      f
+    );
   }
 };
 
@@ -1286,32 +1310,14 @@ proto.iterators.SavedValuesIterator.prototype.setNextValue = function(value) {
 
 
 /**
- * optional int64 produced = 3;
- * @return {number}
- */
-proto.iterators.SavedValuesIterator.prototype.getProduced = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.iterators.SavedValuesIterator} returns this
- */
-proto.iterators.SavedValuesIterator.prototype.setProduced = function(value) {
-  return jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
- * map<string, string> muc = 4;
+ * map<string, string> muc = 3;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.iterators.SavedValuesIterator.prototype.getMucMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
       null));
 };
 
@@ -1323,6 +1329,60 @@ proto.iterators.SavedValuesIterator.prototype.getMucMap = function(opt_noLazyCre
 proto.iterators.SavedValuesIterator.prototype.clearMucMap = function() {
   this.getMucMap().clear();
   return this;};
+
+
+/**
+ * optional int64 produced = 4;
+ * @return {number}
+ */
+proto.iterators.SavedValuesIterator.prototype.getProduced = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedValuesIterator} returns this
+ */
+proto.iterators.SavedValuesIterator.prototype.setProduced = function(value) {
+  return jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+/**
+ * optional float coverage = 5;
+ * @return {number}
+ */
+proto.iterators.SavedValuesIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 5, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedValuesIterator} returns this
+ */
+proto.iterators.SavedValuesIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 5, value);
+};
+
+
+/**
+ * optional float cost = 6;
+ * @return {number}
+ */
+proto.iterators.SavedValuesIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 6, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedValuesIterator} returns this
+ */
+proto.iterators.SavedValuesIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 6, value);
+};
 
 
 
@@ -1398,7 +1458,9 @@ proto.iterators.SavedProjectionIterator.toObject = function(includeInstance, msg
     joinSource: (f = msg.getJoinSource()) && proto.iterators.SavedIndexJoinIterator.toObject(includeInstance, f),
     unionSource: (f = msg.getUnionSource()) && proto.iterators.SavedBagUnionIterator.toObject(includeInstance, f),
     filterSource: (f = msg.getFilterSource()) && proto.iterators.SavedFilterIterator.toObject(includeInstance, f),
-    valuesSource: (f = msg.getValuesSource()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f)
+    valuesSource: (f = msg.getValuesSource()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f),
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0)
   };
 
   if (includeInstance) {
@@ -1463,6 +1525,14 @@ proto.iterators.SavedProjectionIterator.deserializeBinaryFromReader = function(m
       var value = new proto.iterators.SavedValuesIterator;
       reader.readMessage(value,proto.iterators.SavedValuesIterator.deserializeBinaryFromReader);
       msg.setValuesSource(value);
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 8:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -1538,6 +1608,20 @@ proto.iterators.SavedProjectionIterator.serializeBinaryToWriter = function(messa
       6,
       f,
       proto.iterators.SavedValuesIterator.serializeBinaryToWriter
+    );
+  }
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      7,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      8,
+      f
     );
   }
 };
@@ -1765,6 +1849,42 @@ proto.iterators.SavedProjectionIterator.prototype.hasValuesSource = function() {
 };
 
 
+/**
+ * optional float coverage = 7;
+ * @return {number}
+ */
+proto.iterators.SavedProjectionIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 7, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedProjectionIterator} returns this
+ */
+proto.iterators.SavedProjectionIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 7, value);
+};
+
+
+/**
+ * optional float cost = 8;
+ * @return {number}
+ */
+proto.iterators.SavedProjectionIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 8, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedProjectionIterator} returns this
+ */
+proto.iterators.SavedProjectionIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 8, value);
+};
+
+
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -1859,7 +1979,9 @@ proto.iterators.SavedIndexJoinIterator.toObject = function(includeInstance, msg)
     joinRight: (f = msg.getJoinRight()) && proto.iterators.SavedIndexJoinIterator.toObject(includeInstance, f),
     filterRight: (f = msg.getFilterRight()) && proto.iterators.SavedFilterIterator.toObject(includeInstance, f),
     valuesRight: (f = msg.getValuesRight()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f),
-    mucMap: (f = msg.getMucMap()) ? f.toObject(includeInstance, undefined) : []
+    mucMap: (f = msg.getMucMap()) ? f.toObject(includeInstance, undefined) : [],
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 14, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 15, 0.0)
   };
 
   if (includeInstance) {
@@ -1961,6 +2083,14 @@ proto.iterators.SavedIndexJoinIterator.deserializeBinaryFromReader = function(ms
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 14:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 15:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -2090,6 +2220,20 @@ proto.iterators.SavedIndexJoinIterator.serializeBinaryToWriter = function(messag
   f = message.getMucMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(13, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      14,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      15,
+      f
+    );
   }
 };
 
@@ -2560,6 +2704,42 @@ proto.iterators.SavedIndexJoinIterator.prototype.clearMucMap = function() {
   return this;};
 
 
+/**
+ * optional float coverage = 14;
+ * @return {number}
+ */
+proto.iterators.SavedIndexJoinIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 14, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedIndexJoinIterator} returns this
+ */
+proto.iterators.SavedIndexJoinIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 14, value);
+};
+
+
+/**
+ * optional float cost = 15;
+ * @return {number}
+ */
+proto.iterators.SavedIndexJoinIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 15, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedIndexJoinIterator} returns this
+ */
+proto.iterators.SavedIndexJoinIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 15, value);
+};
+
+
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -2653,7 +2833,9 @@ proto.iterators.SavedBagUnionIterator.toObject = function(includeInstance, msg) 
     unionRight: (f = msg.getUnionRight()) && proto.iterators.SavedBagUnionIterator.toObject(includeInstance, f),
     joinRight: (f = msg.getJoinRight()) && proto.iterators.SavedIndexJoinIterator.toObject(includeInstance, f),
     filterRight: (f = msg.getFilterRight()) && proto.iterators.SavedFilterIterator.toObject(includeInstance, f),
-    valuesRight: (f = msg.getValuesRight()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f)
+    valuesRight: (f = msg.getValuesRight()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f),
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 14, 0.0)
   };
 
   if (includeInstance) {
@@ -2749,6 +2931,14 @@ proto.iterators.SavedBagUnionIterator.deserializeBinaryFromReader = function(msg
       var value = new proto.iterators.SavedValuesIterator;
       reader.readMessage(value,proto.iterators.SavedValuesIterator.deserializeBinaryFromReader);
       msg.setValuesRight(value);
+      break;
+    case 13:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 14:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -2873,6 +3063,20 @@ proto.iterators.SavedBagUnionIterator.serializeBinaryToWriter = function(message
       12,
       f,
       proto.iterators.SavedValuesIterator.serializeBinaryToWriter
+    );
+  }
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      13,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      14,
+      f
     );
   }
 };
@@ -3322,6 +3526,49 @@ proto.iterators.SavedBagUnionIterator.prototype.hasValuesRight = function() {
 };
 
 
+/**
+ * optional float coverage = 13;
+ * @return {number}
+ */
+proto.iterators.SavedBagUnionIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 13, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedBagUnionIterator} returns this
+ */
+proto.iterators.SavedBagUnionIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 13, value);
+};
+
+
+/**
+ * optional float cost = 14;
+ * @return {number}
+ */
+proto.iterators.SavedBagUnionIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 14, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedBagUnionIterator} returns this
+ */
+proto.iterators.SavedBagUnionIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 14, value);
+};
+
+
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.iterators.SavedFilterIterator.repeatedFields_ = [7];
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -3389,9 +3636,12 @@ proto.iterators.SavedFilterIterator.toObject = function(includeInstance, msg) {
     joinSource: (f = msg.getJoinSource()) && proto.iterators.SavedIndexJoinIterator.toObject(includeInstance, f),
     valuesRight: (f = msg.getValuesRight()) && proto.iterators.SavedValuesIterator.toObject(includeInstance, f),
     expression: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    variablesList: (f = jspb.Message.getRepeatedField(msg, 7)) == null ? undefined : f,
     muMap: (f = msg.getMuMap()) ? f.toObject(includeInstance, undefined) : [],
-    consumed: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    produced: jspb.Message.getFieldWithDefault(msg, 9, 0)
+    consumed: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    produced: jspb.Message.getFieldWithDefault(msg, 10, 0),
+    coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 11, 0.0),
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0)
   };
 
   if (includeInstance) {
@@ -3458,18 +3708,30 @@ proto.iterators.SavedFilterIterator.deserializeBinaryFromReader = function(msg, 
       msg.setExpression(value);
       break;
     case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addVariables(value);
+      break;
+    case 8:
       var value = msg.getMuMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 8:
+    case 9:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setConsumed(value);
       break;
-    case 9:
+    case 10:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setProduced(value);
+      break;
+    case 11:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCoverage(value);
+      break;
+    case 12:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setCost(value);
       break;
     default:
       reader.skipField();
@@ -3547,21 +3809,42 @@ proto.iterators.SavedFilterIterator.serializeBinaryToWriter = function(message, 
       f
     );
   }
+  f = message.getVariablesList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      7,
+      f
+    );
+  }
   f = message.getMuMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(7, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getConsumed();
   if (f !== 0) {
     writer.writeInt64(
-      8,
+      9,
       f
     );
   }
   f = message.getProduced();
   if (f !== 0) {
     writer.writeInt64(
-      9,
+      10,
+      f
+    );
+  }
+  f = message.getCoverage();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      11,
+      f
+    );
+  }
+  f = message.getCost();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      12,
       f
     );
   }
@@ -3772,14 +4055,51 @@ proto.iterators.SavedFilterIterator.prototype.setExpression = function(value) {
 
 
 /**
- * map<string, string> mu = 7;
+ * repeated string variables = 7;
+ * @return {!Array<string>}
+ */
+proto.iterators.SavedFilterIterator.prototype.getVariablesList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 7));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.setVariablesList = function(value) {
+  return jspb.Message.setField(this, 7, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.addVariables = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 7, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.clearVariablesList = function() {
+  return this.setVariablesList([]);
+};
+
+
+/**
+ * map<string, string> mu = 8;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.iterators.SavedFilterIterator.prototype.getMuMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 7, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 8, opt_noLazyCreate,
       null));
 };
 
@@ -3794,28 +4114,10 @@ proto.iterators.SavedFilterIterator.prototype.clearMuMap = function() {
 
 
 /**
- * optional int64 consumed = 8;
+ * optional int64 consumed = 9;
  * @return {number}
  */
 proto.iterators.SavedFilterIterator.prototype.getConsumed = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.iterators.SavedFilterIterator} returns this
- */
-proto.iterators.SavedFilterIterator.prototype.setConsumed = function(value) {
-  return jspb.Message.setProto3IntField(this, 8, value);
-};
-
-
-/**
- * optional int64 produced = 9;
- * @return {number}
- */
-proto.iterators.SavedFilterIterator.prototype.getProduced = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
 };
 
@@ -3824,8 +4126,62 @@ proto.iterators.SavedFilterIterator.prototype.getProduced = function() {
  * @param {number} value
  * @return {!proto.iterators.SavedFilterIterator} returns this
  */
-proto.iterators.SavedFilterIterator.prototype.setProduced = function(value) {
+proto.iterators.SavedFilterIterator.prototype.setConsumed = function(value) {
   return jspb.Message.setProto3IntField(this, 9, value);
+};
+
+
+/**
+ * optional int64 produced = 10;
+ * @return {number}
+ */
+proto.iterators.SavedFilterIterator.prototype.getProduced = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.setProduced = function(value) {
+  return jspb.Message.setProto3IntField(this, 10, value);
+};
+
+
+/**
+ * optional float coverage = 11;
+ * @return {number}
+ */
+proto.iterators.SavedFilterIterator.prototype.getCoverage = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 11, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.setCoverage = function(value) {
+  return jspb.Message.setProto3FloatField(this, 11, value);
+};
+
+
+/**
+ * optional float cost = 12;
+ * @return {number}
+ */
+proto.iterators.SavedFilterIterator.prototype.getCost = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 12, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedFilterIterator} returns this
+ */
+proto.iterators.SavedFilterIterator.prototype.setCost = function(value) {
+  return jspb.Message.setProto3FloatField(this, 12, value);
 };
 
 
