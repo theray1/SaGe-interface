@@ -38,7 +38,7 @@ const nodeTypes = { projectionNode: ProjectionNode,
                     deleteNode: DeleteNode};
 
 let sparqlRequest = {
-  query: "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nSELECT ?s ?p ?o WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) }",
+  query: "SELECT ?s ?p ?o WHERE { ?s ?p ?o }",
   defaultGraph: "http://example.org/bsbm"
 };
 
@@ -49,14 +49,6 @@ const nodeHeight = 250;
 
 function App(){
 
-  //bsbm10
-  //"query": "SELECT ?s ?p ?o WHERE { ?s ?p ?o }"
-  //"query": "PREFIX p1: <http://www.w3.org/2000/01/rdf-schema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/2001/XMLSchema#> SELECT ?label WHERE { ?s p2:date '2000-07-15'^^p3:date; p1:label ?label . FILTER regex(?label, 't', 'i') }",
-    
-  //bsbm1k
-  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> SELECT ?s ?p ?o WHERE { ?s p2:date ?date . FILTER (?date > '2004-01-01'^^p1:date) }"
-  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#> PREFIX p2: <http://purl.org/dc/elements/1.1/> PREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> SELECT ?s ?p ?o WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) }",
-  //"query": "PREFIX p1: <http://www.w3.org/2001/XMLSchema#>\nPREFIX p2: <http://purl.org/dc/elements/1.1/>\nPREFIX p3: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX p4: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/>\nPREFIX p5: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/dataFromProducer4/>\nSELECT ?s ?p ?o WHERE { { SELECT * WHERE { ?s ?p ?o; p2:date ?date; p3:type p4:Review . FILTER (?date > '2004-01-01'^^p1:date) } } UNION { SELECT * WHERE { ?s ?p ?o; p4:reviewFor ?reviewed . } } }"
 
 
   const dagreGraph = new dagre.graphlib.Graph();
@@ -301,9 +293,6 @@ function App(){
     .then(res => res.json())
     .then(data => {
 
-      console.log(data);
-      console.log(nextLink_to_jsonPlan(data["next"]));
-
       if(data["hasNext"]){
 
         let graphElements = nextLink_to_graph(data["next"]);
@@ -316,6 +305,7 @@ function App(){
 
         alert("All the elements were found in one quantum! If you would like to have the data, and a more detailed execution plan, please reduce the max_results attribute or the quota attribute in your config file");
         stateManager.setState("postQueryEnd");
+        setResults(data["bindings"]);
 
       }
 
@@ -393,7 +383,6 @@ function App(){
         setResults(results.concat(data["bindings"]));
 
       }else {//query is over
-        console.log(data);
         stateManager.setState("postQueryEnd");
 
       }
@@ -498,11 +487,26 @@ function App(){
     setNextLink(newLink);
   }
 
+    /**
+   * Checks if an element is an HTML element representing a Scan Operator Node
+   * @param {*} element The element to be checked
+   * @returns True if the id attribute of the element isn't null and the id attribute of the element belongs to the leaves, false otherwise
+   */
+     const isScanNode = (element) => {
+      for(var leaf in leaves){
+        var id = element.getAttribute("id");
+        if(id !== null && leaves[leaf].id.toString() === id.toString()){
+          return true;
+        }
+      }
+      return false;
+    }
+
   /**
    * Allows the user to modify the lastRead attribute of one the scan operators of the plan 
    * @param {*} targetNode The node representing the scan operator to modify
    */
-  const offSetNode = (targetNode) => {
+  const offSetNode = (targetNode, newValue) => {
     var plan = nextLink_to_jsonPlan(nextLink);
     var current = plan;
 
@@ -513,29 +517,13 @@ function App(){
     }
     
     var currentLastRead = current["lastRead"];
+    var maxRead = current["cardinality"];
 
-    var value = window.prompt("Last Triple Read : " + currentLastRead, 0);
-
-    var parsedValue = parseInt(value);
+    var parsedValue = parseInt(newValue);
 
     if(Number.isInteger(parsedValue)/*value is a number*/ && parsedValue > 0 /*value is not incoherent (greater than 0 and lesser than there are triple patter to scan)*/){
-      __offSetNode(targetNode.getAttribute("id"), value);
+      __offSetNode(targetNode.getAttribute("id"), newValue);
     }
-  }
-
-  /**
-   * Checks if an element is an HTML element representing a Scan Operator Node
-   * @param {*} element The element to be checked
-   * @returns True if the id attribute of the element isn't null and the id attribute of the element belongs to the leaves, false otherwise
-   */
-  const isScanNode = (element) => {
-    for(var leaf in leaves){
-      var id = element.getAttribute("id");
-      if(id !== null && leaves[leaf].id.toString() === id.toString()){
-        return true;
-      }
-    }
-    return false;
   }
 
 
@@ -579,9 +567,11 @@ function App(){
   const handleGraphClick = (e) => {
 
     var target = e.target;
+    var newValue = target.getAttribute("aria-valuenow");
+    var contNode = target.parentNode.parentNode.parentNode.parentNode;
 
-    if(isScanNode(target) && stateManager.canOffSet()){
-      offSetNode(target);
+    if(isScanNode(contNode) && stateManager.canOffSet()){
+      offSetNode(contNode, newValue);
     };
   }
 
@@ -593,12 +583,15 @@ function App(){
     
       stateManager.setState("offSet");
 
-      document.getElementById("root").classList.add("shadowedApp");
+      document.getElementById("root").classList.add("ShadowedApp");
 
       for(var i = 0; i < allNodes.length; i++){
 
-        if(!isScanNode(allNodes[i])) allNodes[i].classList.add("shadowedNode");
-
+        if(!isScanNode(allNodes[i])) {
+          allNodes[i].classList.add("ShadowedNode");
+        } else {
+          allNodes[i].classList.add("HighlightedNode");
+        }
       }
     
     } else {
@@ -607,11 +600,12 @@ function App(){
     
         stateManager.setState("betweenSteps");
     
-        document.getElementById("root").classList.remove("shadowedApp");
+        document.getElementById("root").classList.remove("ShadowedApp");
 
         for(var j = 0; j < allNodes.length; j++){
 
-          allNodes[j].classList.remove("shadowedNode");
+          allNodes[j].classList.remove("ShadowedNode");
+          allNodes[j].classList.remove("HighlightedNode");
           
         }
       } 
@@ -621,7 +615,6 @@ function App(){
 
   return(
     <div className="App">
-      
       <div className="Header">
         <div className="CreditsAndUsefulLinks">
           <ul>
@@ -694,7 +687,7 @@ function App(){
             fitView
             minZoom={0.1} 
             maxZoom={5}
-            onClick={(e) => {handleGraphClick(e)}}>
+            onMouseUp={(e) => {handleGraphClick(e)}}>
               <Controls/>
           </ReactFlow>
         </div>

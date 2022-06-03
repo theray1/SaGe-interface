@@ -1,0 +1,52 @@
+
+.OffSetSlider {
+    width: 80%;
+    max-width: 500px;
+    height: 0vh;
+    margin: auto;
+    overflow: hidden;
+}
+
+.HighlightedNode .OffSetSlider {
+    height: 8vh;
+    overflow: visible;
+
+    transition: height 0.5s, overflow 0.5s;
+}
+
+.Thumb {
+    cursor: pointer;
+    position: absolute;
+    z-index: 100;
+    background: #ffffff;
+    border: 5px solid #3774ff;
+    border-radius: 100%;
+    display: block;
+    box-shadow: 0 0 2px 0 rgb(0 0 0 / 44%);
+}
+
+.Thumb.active {
+    background-color: grey;
+}
+
+.Track {
+    position: relative;
+    background: #ddd;
+}
+
+.Track.Track-0 {
+    background: #83a9ff;
+}
+
+.OffSetSlider .Track {
+    top: 20px;
+    height: 4px;
+}
+
+.OffSetSlider .Thumb {
+    top: 12px;
+    width: 10px;
+    outline: none;
+    height: 10px;
+    line-height: 38px;
+}

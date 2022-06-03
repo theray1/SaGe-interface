@@ -657,7 +657,8 @@ proto.iterators.SavedScanIterator.toObject = function(includeInstance, msg) {
     cumulativeCardinality: jspb.Message.getFieldWithDefault(msg, 8, 0),
     stages: jspb.Message.getFieldWithDefault(msg, 11, 0),
     coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0),
-    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0)
+    cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0),
+    cardinality: jspb.Message.getFieldWithDefault(msg, 14, 0)
   };
 
   if (includeInstance) {
@@ -742,6 +743,10 @@ proto.iterators.SavedScanIterator.deserializeBinaryFromReader = function(msg, re
     case 13:
       var value = /** @type {number} */ (reader.readFloat());
       msg.setCost(value);
+      break;
+    case 14:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setCardinality(value);
       break;
     default:
       reader.skipField();
@@ -841,6 +846,13 @@ proto.iterators.SavedScanIterator.serializeBinaryToWriter = function(message, wr
   if (f !== 0.0) {
     writer.writeFloat(
       13,
+      f
+    );
+  }
+  f = message.getCardinality();
+  if (f !== 0) {
+    writer.writeInt64(
+      14,
       f
     );
   }
@@ -1069,6 +1081,24 @@ proto.iterators.SavedScanIterator.prototype.getCost = function() {
  */
 proto.iterators.SavedScanIterator.prototype.setCost = function(value) {
   return jspb.Message.setProto3FloatField(this, 13, value);
+};
+
+
+/**
+ * optional int64 cardinality = 14;
+ * @return {number}
+ */
+proto.iterators.SavedScanIterator.prototype.getCardinality = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 14, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedScanIterator} returns this
+ */
+proto.iterators.SavedScanIterator.prototype.setCardinality = function(value) {
+  return jspb.Message.setProto3IntField(this, 14, value);
 };
 
 

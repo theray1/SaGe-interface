@@ -3,11 +3,13 @@ import { Handle } from "react-flow-renderer";
 import NodeProgressBar from "../progressbars/NodeProgressBar";
 import ContainerNode from "./ContainerNode";
 import { dataToTable } from "../util";
+import ReactSlider from "react-slider";
+import './Slider.css';
 
 function ScanNode(props){
 
     const nodeData = props;
-    const coverage = 100 * nodeData.data.coverage;
+    const coverage = 100 * nodeData.data.produced / nodeData.data.cardinality;
 
     /**
    * Displays the node's current values for each variable
@@ -18,8 +20,21 @@ function ScanNode(props){
       return dataToTable(data, "ScanNodeMainData");
     }
 
+    const getLastRead = () => {
+      return nodeData.data.lastRead;
+    }
+
     const content = 
       <div className="QueryNode">
+        <ReactSlider
+          id={nodeData.id}
+          className="OffSetSlider"
+          thumbClassName="Thumb"
+          trackClassName="Track"
+          max={nodeData.data.cardinality}
+          defaultValue={parseInt(getLastRead())}
+          renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
+        />
         <div className="Handles">
           <Handle type='source' position="top"/>
         </div>
@@ -28,8 +43,9 @@ function ScanNode(props){
             ["SUBJECT",nodeData.data.pattern.subject],
             ["PREDICATE", nodeData.data.pattern.predicate],
             ["OBJECT", nodeData.data.pattern.object],
-            ["Cardinality (cumulative)", nodeData.data.cumulativeCardinality],
-            ["Produced (cumulative)", nodeData.data.cumulativeProduced]
+            ["Cardinality ", nodeData.data.cardinality],
+            ["Produced ", nodeData.data.produced],
+            ["Last Read", nodeData.data.lastRead]
           ])}
           <br/>
           <div id={"NodeProgressBarContainer" + nodeData.id} className="NodeProgressBarContainer">
@@ -40,7 +56,8 @@ function ScanNode(props){
         </div>
         <div className="DisplayData">
           Cost: <br/>{nodeData.data.cost}<br/>
-          Produced: <br/>{nodeData.data.produced}<br/>
+          Produced (cumulative): <br/>{nodeData.data.cumulativeProduced}<br/>
+          Cardinality (cumulative): <br/>{nodeData.data.cumulativeCardinality}<br/>
         </div>
       </div>
 

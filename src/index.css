@@ -25,7 +25,7 @@ button {
   height: 100vh;
 }
 
-.shadowedApp::before {
+.ShadowedApp::before {
   position: absolute;
   top: 0;
   right: 0;

@@ -1,3 +1,35 @@
+# How to use SaGe-interface
+
+## SaGe-interface
+
+Clone the [project's repository](https://github.com/theray1)
+
+To install required node modules, please run :
+### `npm i`
+
+inside the project's directory.
+
+Once this is done :
+
+### `npm start`
+
+This will start the web app.
+
+## SaGe-engine
+
+In order to use SaGe-interface, you need to have a local instance of SaGe-engine running.
+
+To install SaGe-engine, please take a look at the [SaGe-engine GitHub](https://github.com/sage-org/sage-engine)
+
+Once SaGe-engine is installed, please run :
+
+### `poetry run sage path/to/your/config_file.yaml -p 8000`
+
+A config file example, alongside its .htd file can be found in 
+
+### `SaGe-interface/examples/example_config.yaml`
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

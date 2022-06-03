@@ -95,6 +95,7 @@ const node_factory = (obj, key, id, path) => {
       pattern: obj[key].pattern,
       produced: obj[key].produced,
       stages: obj[key].stages,
+      cardinality: obj[key].cardinality,
     };
   }
   else if(key === 'valuesSource' || key === 'valuesLeft' || key === 'valuesRight'){//Values
