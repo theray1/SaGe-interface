@@ -4,16 +4,13 @@
 
 Clone the [project's repository](https://github.com/theray1)
 
-To install required node modules, please run :
+To install required node modules, once inside the project's directory, run :
 ### `npm i`
 
-inside the project's directory.
-
-Once this is done :
+When this is done :
 
 ### `npm start`
 
-This will start the web app.
 
 ## SaGe-engine
 
@@ -30,7 +27,10 @@ A config file example, alongside its .htd file can be found in
 ### `SaGe-interface/examples/example_config.yaml`
 
 
-# Getting Started with Create React App
+
+
+
+## Create React App  
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
@@ -21,11 +21,13 @@ import ScanNode from './nodes/ScanNode';
 import ValuesNode from './nodes/ValuesNode';
 import InsertNode from './nodes/InsertNode';
 import DeleteNode from './nodes/DeleteNode';
-import { roundDownFiveDecimals } from './util';
+import { roundDownFiveDecimals, displayResults, displayResult } from './util';
 import QueryProgressBar from './progressbars/QueryProgressBar';
 import YASQE from 'yasgui-yasqe';
 import "./yasqe.css";
 import StateManager from './stateManager';
+import { ResizableBox } from 'react-resizable';
+import "../node_modules/react-resizable/css/styles.css"
 
 //All the node types used by ReactFlow. Each one represents an operator used by SaGe 
 const nodeTypes = { projectionNode: ProjectionNode,
@@ -47,10 +49,39 @@ let sparqlServer = "http://localhost:8000/sparql";
 const nodeWidth = 600;
 const nodeHeight = 250;
 
+const areRowsEqual = (prevRow, nextRow) => {
+  for(var variable in prevRow){
+    if(prevRow[variable] !== nextRow[variable]){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Memoized Row for result rendering optimization
+ */
+const ResultRow = React.memo(({result}) => {
+  return displayResult(result, JSON.stringify(result));
+}, areRowsEqual);
+
+/**
+ * Memoized List for results rendering optimization
+ */
+const ResultList = React.memo(({resultList}) => {
+  if(resultList !== undefined){
+    return (
+        <tbody>
+          {resultList.slice(0, Math.min(resultList.length, 200)).map((result) => {
+            return <ResultRow key={JSON.stringify(result)} result={result}/>
+          })}
+        </tbody>
+    )
+  }
+})
+
 function App(){
-
-
-
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -63,6 +94,7 @@ function App(){
   const [nextLink, setNextLink] = useState(null);
 
   const [results, setResults] = useState([]);
+  const [variables, setVariables] = useState(<></>);
   
   const [nodes, setNodes, onNodesChange] = useNodesState([]); 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -72,7 +104,7 @@ function App(){
   const [importMetric, setImportMetric] = useState("");
   const [costMetric, setCostMetric] = useState("");
   const [coverageMetric, setCoverageMetric] = useState("");
-    
+
   //componentDidMount equivalent. It is used to create the yasqe editor and the state manager once and only once, when the page is loaded
   useEffect(() => {
       const newYasqe = YASQE(document.getElementById("YasqeEditor"));
@@ -262,6 +294,29 @@ function App(){
 
   //-----------------------------------------------------------------------------------QUERY MANAGEMENT-------------------------------------------------------------------------------------------------------
 
+  const createFirstResults = (res) => {
+    
+    var variables = [];
+
+    for(var variable in res[0]){
+      variables.push(<th key={variable}>{variable}</th>);
+    }
+
+    var header= (
+        <tr key={"header"}>
+          {variables}  
+        </tr>
+    )
+
+    setVariables(header);
+    setResults(res);
+  }
+
+  const createResults = (res) => {
+
+    setResults(results.concat(res));
+  } 
+
   /**
    * Auxiliary function used by commitQuery(). Creates a HTML request with a query as its body and sends it to the SaGe server.
    * @param {*} query The query to be commited
@@ -298,14 +353,15 @@ function App(){
         let graphElements = nextLink_to_graph(data["next"]);
         createGraph(graphElements["graphElements"]);
         setLeaves(graphElements["leaves"]);
-        setResults(results.concat(data["bindings"]));
+        createFirstResults(data["bindings"]);
 
 
       } else {
 
         alert("All the elements were found in one quantum! If you would like to have the data, and a more detailed execution plan, please reduce the max_results attribute or the quota attribute in your config file");
         stateManager.setState("postQueryEnd");
-        setResults(data["bindings"]);
+        createFirstResults(data["bindings"]);
+        
 
       }
 
@@ -380,7 +436,7 @@ function App(){
         let graphElements = nextLink_to_graph(data["next"]);
         updateGraph(graphElements["graphElements"]);
         setLeaves(graphElements["leaves"]);
-        setResults(results.concat(data["bindings"]));
+        createResults(data["bindings"]);
 
       }else {//query is over
         stateManager.setState("postQueryEnd");
@@ -613,7 +669,7 @@ function App(){
     }
   }
 
-  return(
+  return( 
     <div className="App">
       <div className="Header">
         <div className="CreditsAndUsefulLinks">
@@ -661,23 +717,24 @@ function App(){
     
 
       <div className="MainGraphWithMetrics">
-        
         <div className="Metrics">
           <div className="MetricsContent">
           
+
+            Results:<br/>{results.length}<br/> <br/>
             Export:<br/>{roundDownFiveDecimals(stats.exportMetric)}<br/><br/>
             Import:<br/>{roundDownFiveDecimals(stats.importMetric)}<br/><br/>
             Cost:<br/>{roundDownFiveDecimals(stats.costMetric)}<br/><br/>
             Coverage:<br/>{roundDownFiveDecimals(stats.coverageMetric)}<br/>
+            
             <div id="QueryProgressBarContainer" className="QueryProgressBarContainer">
               <QueryProgressBar backgroundColor={"#eb7ce1"} progressBarColor={"#80036d"} progressValue={stats.coverageMetric*100}/>
             </div>
-          </div>
-          
-          <div className="ResultsContainer">
+            <br/>
+
             
           </div>
-        </div>    
+        </div>   
         <div className="MainGraph">
           <ReactFlow
             nodes={nodes} 
@@ -692,9 +749,26 @@ function App(){
           </ReactFlow>
         </div>
       </div>
+      <ResizableBox resizeHandles={['n']} height={100} width={1920} minConstraints={[100, 100]}>
+      <div className="Results">
+        <div className="ResultsContainer">
+          <table className="ResultsContent">
+            <thead>
+              {variables}
+            </thead>
+            <ResultList resultList={results}/>
+          </table>
+        </div>
+      </div>
+      </ResizableBox>
+      
     </div>
   )
 }
+
+/**
+ * 
+ */
 
 ReactDOM.render(
   <React.StrictMode>

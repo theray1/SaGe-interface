@@ -84,44 +84,39 @@ const jsonToArray = (json) => {
 }
 
 
-const displayElement = (element, key) => {
-    return (
-        <div key={element[0].toString()+key.toString()} className="triplePatternElement">
-            {element[0]}: {element[1]}
-            <br/>
-        </div>
-    )
-}
+const displayResult = (result, key) => {
+    
+    var row = [];
 
-const displayTriplePattern = (triplePattern, key) => {
-
-    var triplePatternArray = [];
-
-    for(var ite in triplePattern){
-        triplePatternArray.push([ite,triplePattern[ite]]);
+    for(var element in result){
+        row.push(
+            <th key={key+element}>
+                {result[element]}
+            </th>
+        );
     }
 
-    return(
-        <div key={key} className="triplePattern">
-            {triplePatternArray.map((element) => {
-                return displayElement(element, key); 
-            })}
-            <br/><br/>
-        </div>
-        
-    ) 
+    return (
+        <tr key={key}>
+            {row}
+        </tr>
+    ) ;
 
 }
 
 const displayResults = (results) => {
+    
+    var rows = [];
 
-    var key = 0;
-
-    return results.map((triplePattern) => {
-        key++;
-
-        return displayTriplePattern(triplePattern, key);
-    })
+    for(var result in results) {
+        var val = results[result];
+        rows.push(
+            <tr key={JSON.stringify(val)}>
+                {displayResult(val, JSON.stringify(val))}
+            </tr>
+        );
+    }
+    return rows;
 }
 
-export { dataToTable, roundDownFiveDecimals, jsonToArray };
+export { dataToTable, roundDownFiveDecimals, jsonToArray, displayResults, displayResult };

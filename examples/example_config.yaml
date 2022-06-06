@@ -1,7 +1,7 @@
 name: SaGe Test server
 maintainer: Shi Zue
 quota: 75
-max_results: 1
+max_results: 100
 graphs:
 -
   name: bsbm

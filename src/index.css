@@ -37,6 +37,7 @@ button {
 }
 
 .Header {
+  min-height: 5%;
   height: 21%;
   display: flex;
   resize: vertical;
@@ -93,12 +94,11 @@ button {
 
 .MainGraphWithMetrics {
   width: 100%;
-  
-  flex-basis: 80%;
+  height: 100%;
+  min-height: 25%;
 
   display: flex;
   flex-direction: row;
-  flex: 1;
   overflow: hidden;
 }
 
@@ -129,18 +129,15 @@ button {
   padding-bottom: 20px;
 }
 
-.ResultsContainer {
-  max-height: 45%;
-  font-family: 'Courier New', Courier, monospace;
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
 .QueryProgressBarContainer {
   height: 2.5px;
 }
 
+.Results {
+  font-family: 'Courier New', Courier, monospace;
+  min-height: 0;
+}
 
-
-
-
+.ResultsContent {
+  overflow: scroll;
+}
