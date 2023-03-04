@@ -29,6 +29,7 @@ import StateManager from './stateManager';
 import { ResizableBox } from 'react-resizable';
 import "../node_modules/react-resizable/css/styles.css"
 
+//useless comment
 //All the node types used by ReactFlow. Each one represents an operator used by SaGe 
 const nodeTypes = { projectionNode: ProjectionNode,
                     joinNode: JoinNode,
