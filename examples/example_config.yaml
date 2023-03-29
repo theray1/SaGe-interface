@@ -1,11 +1,11 @@
 name: SaGe Test server
 maintainer: Shi Zue
-quota: 75
-max_results: 100
+quota: 0
+max_results: 10000
 graphs:
 -
   name: bsbm
   uri: http://example.org/bsbm
   description: DefinitelyAUsefulDescription
   backend: hdt-file
-  file: ../sage-interface/examples/bsbm1k.hdt
+  file: ../SaGe-interface/examples/bsbm1k.hdt

@@ -9,7 +9,8 @@ import './Slider.css';
 function ScanNode(props){
 
     const nodeData = props;
-    const coverage = 100 * nodeData.data.lastRead / nodeData.data.cardinality;
+    //const coverage = 100 * nodeData.data.lastRead / nodeData.data.cardinality;
+    const coverage = 100*nodeData.data.coverage;
 
     /**
    * Displays the node's current values for each variable

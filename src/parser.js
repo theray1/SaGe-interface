@@ -96,6 +96,7 @@ const node_factory = (obj, key, id, path) => {
       produced: obj[key].produced,
       stages: obj[key].stages,
       cardinality: obj[key].cardinality,
+      scans: obj[key].scans,
     };
   }
   else if(key === 'valuesSource' || key === 'valuesLeft' || key === 'valuesRight'){//Values
@@ -200,7 +201,7 @@ const plan_request_to_graph = (obj) => {
  */
 export function nextLink_to_graph(nextLink) {
   var jsonPlan = nextLink_to_jsonPlan(nextLink);
-  
+  console.log(jsonPlan);
   const graph = plan_request_to_graph(jsonPlan);
 
   return graph;
@@ -215,6 +216,8 @@ export function nextLink_to_jsonPlan(nextLink) {
   var bufferedPlan = Buffer.from(nextLink, 'base64');
 
   var jsonPlan = proto.RootTree.deserializeBinary(new Uint8Array(bufferedPlan)).toObject();
+
+  console.log(jsonPlan);
 
   return jsonPlan;
 }

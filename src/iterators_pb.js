@@ -7,7 +7,7 @@
  * @public
  */
 // GENERATED CODE -- DO NOT EDIT!
-/* eslint-disable */
+/*eslint-disable*/
 
 var jspb = require('google-protobuf');
 var goog = jspb;
@@ -658,7 +658,8 @@ proto.iterators.SavedScanIterator.toObject = function(includeInstance, msg) {
     stages: jspb.Message.getFieldWithDefault(msg, 11, 0),
     coverage: jspb.Message.getFloatingPointFieldWithDefault(msg, 12, 0.0),
     cost: jspb.Message.getFloatingPointFieldWithDefault(msg, 13, 0.0),
-    cardinality: jspb.Message.getFieldWithDefault(msg, 14, 0)
+    cardinality: jspb.Message.getFieldWithDefault(msg, 14, 0),
+    scans: jspb.Message.getFieldWithDefault(msg, 15, 0)
   };
 
   if (includeInstance) {
@@ -747,6 +748,10 @@ proto.iterators.SavedScanIterator.deserializeBinaryFromReader = function(msg, re
     case 14:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setCardinality(value);
+      break;
+    case 15:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setScans(value);
       break;
     default:
       reader.skipField();
@@ -853,6 +858,13 @@ proto.iterators.SavedScanIterator.serializeBinaryToWriter = function(message, wr
   if (f !== 0) {
     writer.writeInt64(
       14,
+      f
+    );
+  }
+  f = message.getScans();
+  if (f !== 0) {
+    writer.writeInt64(
+      15,
       f
     );
   }
@@ -1099,6 +1111,24 @@ proto.iterators.SavedScanIterator.prototype.getCardinality = function() {
  */
 proto.iterators.SavedScanIterator.prototype.setCardinality = function(value) {
   return jspb.Message.setProto3IntField(this, 14, value);
+};
+
+
+/**
+ * optional int64 scans = 15;
+ * @return {number}
+ */
+proto.iterators.SavedScanIterator.prototype.getScans = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 15, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.iterators.SavedScanIterator} returns this
+ */
+proto.iterators.SavedScanIterator.prototype.setScans = function(value) {
+  return jspb.Message.setProto3IntField(this, 15, value);
 };
 
 

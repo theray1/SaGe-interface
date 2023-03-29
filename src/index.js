@@ -316,6 +316,8 @@ function App(){
   const createResults = (res) => {
 
     setResults(results.concat(res));
+    console.log("results: ");
+    console.log(results);
   } 
 
   /**
@@ -339,7 +341,7 @@ function App(){
   }
 
   /**
-   * Auxiliary function used by commitQuery(). Deals with the response generated from sending a query to the SaGe server
+   * Auxiliary function used by commitQuery(). Handles the response generated from sending a query to the SaGe server
    * @param {*} promise 
    * @returns The promise generated from sending a query to the SaGe server and then updating the interface accordingly
    */
@@ -355,7 +357,6 @@ function App(){
         createGraph(graphElements["graphElements"]);
         setLeaves(graphElements["leaves"]);
         createFirstResults(data["bindings"]);
-
 
       } else {
 
